@@ -5,7 +5,7 @@ import AppSider from "./Sider"
 
 const AppLayout = () => {
   return (
-    <Layout className="w-[calc(50% - 8px)] max-w-[calc(50% - 8px)] h-screen">
+    <Layout className="w-screen h-screen">
       <AppSider />
       <Layout>
         <AppHeader />
