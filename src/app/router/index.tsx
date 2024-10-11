@@ -1,19 +1,14 @@
-import { lazy } from "react"
 import { createBrowserRouter } from "react-router-dom"
+import { RouterData } from "../data"
 import AppLayout from "../layout"
-
-const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"))
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
-    children: [
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-    ],
+    children: RouterData.map((item) => {
+      return item
+    }),
   },
 ])
 export default router

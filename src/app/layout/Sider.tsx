@@ -1,15 +1,25 @@
 import { cn } from "@/utils/function"
 import { Layout, Menu, Typography } from "antd"
 import { MacScrollbar } from "mac-scrollbar"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { MenuItems } from "./data"
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { RouterData } from "../data"
 
 const AppSider = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const [currentLocation, setCurrentLocation] = useState("/")
+  const location = useLocation()
   const navigate = useNavigate()
 
-  const handleSelectMenu = (key: string) => {}
+  const handleSelectMenu = (key: string) => {
+    setCurrentLocation(key)
+    navigate(key)
+  }
+
+  useEffect(() => {
+    if (location.pathname !== currentLocation)
+      setCurrentLocation(location.pathname)
+  }, [location])
 
   return (
     <Layout.Sider
@@ -41,10 +51,13 @@ const AppSider = () => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultOpenKeys={["1"]}
-          defaultSelectedKeys={["1-1"]}
+          defaultOpenKeys={[]}
+          defaultSelectedKeys={[currentLocation]}
           onSelect={({ key }) => handleSelectMenu(key)}
-          items={MenuItems}
+          items={RouterData.map((item) => {
+            const { index, ...rest } = item
+            return rest
+          })}
         />
       </MacScrollbar>
     </Layout.Sider>
