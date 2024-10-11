@@ -1,17 +1,21 @@
-import { Layout } from "antd"
+import {Layout, Spin} from "antd"
 import AppContent from "./Content"
 import AppHeader from "./Header"
 import AppSider from "./Sider"
+import {useKeycloak} from "@react-keycloak/web";
 
 const AppLayout = () => {
+  const keyCloak = useKeycloak()
   return (
-    <Layout className="w-screen h-screen">
-      <AppSider />
-      <Layout>
-        <AppHeader />
-        <AppContent />
+    <Spin spinning={!keyCloak.initialized}>
+      <Layout className="w-[calc(50% - 8px)] max-w-[calc(50% - 8px)] h-screen">
+        <AppSider />
+        <Layout>
+          <AppHeader />
+          <AppContent />
+        </Layout>
       </Layout>
-    </Layout>
+    </Spin>
   )
 }
 export default AppLayout
