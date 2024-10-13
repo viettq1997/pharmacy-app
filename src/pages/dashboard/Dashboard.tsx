@@ -1,7 +1,7 @@
 import { atomCountGlobal } from "@/states/dashboard"
 import { Button, Card, Flex } from "antd"
 import { useAtom } from "jotai"
-import { useState } from "react"
+import { memo, useState } from "react"
 
 const Dashboard = () => {
   const [countLocalState, setCountLocalState] = useState(0)
@@ -24,4 +24,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default memo(Dashboard)
