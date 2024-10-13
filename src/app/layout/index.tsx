@@ -11,8 +11,6 @@ const AppLayout = () => {
   const { keycloak, initialized } = useKeycloak()
   const [cookies, setCookie] = useCookies(["token"])
 
-  if (initialized && !keycloak.authenticated) keycloak.login()
-
   useEffect(() => {
     if (keycloak.authenticated && !cookies.token)
       setCookie("token", keycloak.token)

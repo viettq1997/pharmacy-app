@@ -3,12 +3,14 @@ import {
   DashboardOutlined,
   InboxOutlined,
   MedicineBoxOutlined,
+  UserOutlined,
 } from "@ant-design/icons"
 import { lazy, ReactElement } from "react"
 
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"))
 const Supplier = lazy(() => import("@/pages/supplier/Supplier"))
 const Medicine = lazy(() => import("@/pages/medicine/MedicineContext"))
+const Employees = lazy(() => import("@/pages/employee/Employees"))
 
 type TRouteData = {
   key: string
@@ -43,5 +45,13 @@ export const RouterData: TRouteData[] = [
     subject: "medicine",
     icon: <MedicineBoxOutlined />,
     element: <Medicine />,
+  },
+  {
+    key: "/employee",
+    path: "/employee",
+    label: "Employee",
+    subject: "employee",
+    icon: <UserOutlined />,
+    element: <Employees />,
   },
 ]

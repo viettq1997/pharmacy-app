@@ -22,6 +22,9 @@ createRoot(document.getElementById("root")!).render(
     initOptions={{
       onLoad: "check-sso",
     }}
+    onEvent={(e) => {
+      if (e === "onReady" && !keycloak.authenticated) keycloak.login()
+    }}
   >
     <StrictMode>
       <AppProvider />

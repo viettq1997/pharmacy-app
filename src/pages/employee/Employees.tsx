@@ -1,0 +1,192 @@
+import React, { useEffect, useState } from 'react';
+import { Table, Modal, Button, Input, Popconfirm, message } from 'antd';
+import BaseForm from '@/components/BaseForm';
+import { Employee } from '@/types/EmployeeTypes';
+import {Field} from "@/types/FieldTypes.ts";
+import useApi from "@/hooks/useApi.tsx";
+import {useKeycloak} from "@react-keycloak/web";
+import {DeleteOutlined, EditOutlined, EyeOutlined} from "@ant-design/icons";
+
+const { Search } = Input;
+
+const employeeFields: Field[] = [
+  { name: 'username', label: 'Username', type: 'text', rules: [{ required: true }] },
+  // { name: 'role', label: 'Role', type: 'text', rules: [{ required: true }] },
+  { name: 'password', label: 'Password', type: 'password', rules: [{ required: true }] },
+  { name: 'firstName', label: 'First Name', type: 'text', rules: [{ required: true }] },
+  { name: 'lastName', label: 'Last Name', type: 'text', rules: [{ required: true }] },
+  { name: 'birthDate', label: 'Birth Date', type: 'text', rules: [{ required: true }] },
+  // { name: 'age', label: 'Age', type: 'number', rules: [{ required: true }] },
+  { name: 'sex', label: 'Sex', type: 'text', rules: [{ required: true }] },
+  { name: 'type', label: 'Type', type: 'text', rules: [{ required: true }], options: [{label: 'Manager', value: 'Manager'}, {label: 'Employee', value: 'Employee'}]},
+  { name: 'address', label: 'Address', type: 'textarea' },
+  { name: 'mail', label: 'Email', type: 'email', rules: [{ required: true, type: 'email' }] },
+  { name: 'phoneNo', label: 'Phone Number', type: 'text' },
+  { name: 'salary', label: 'Salary', type: 'number', rules: [{ required: true }] },
+];
+
+
+const Employees: React.FC = () => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
+  const [keyword, setKeyword] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const {keycloak} = useKeycloak();
+
+  const {apiPost, apiPut, apiGet, apiDelete} = useApi();
+  const fetchEmployees = async (_page: number = currentPage, _size: number = pageSize) => {
+    try {
+      const response = await apiGet(`/employees`);
+      const { data } = response;
+      setEmployees(data.content);
+      setTotal(data.totalElement);
+    } catch (error) {
+      console.log(error)
+      message.error('Failed to fetch employees');
+    }
+  };
+
+  const handleFinish = async (values: Employee) => {
+    setSubmitting(true)
+    try {
+      if (editingEmployee) {
+        await apiPut(`/employees/${editingEmployee.id}`, values);
+        message.success('Employee updated successfully');
+      } else {
+        await apiPost('/employees', values);
+        message.success('Employee created successfully');
+      }
+      setIsModalVisible(false);
+      setEditingEmployee(null);
+      fetchEmployees(currentPage, pageSize);
+    } catch (error) {
+      message.error('Failed to save employee');
+    }
+    setSubmitting(false)
+  };
+
+  const handleDelete = async (id: any) => {
+    try {
+      await apiDelete(`/employees/${id}`);
+      message.success('Employee deleted successfully');
+      fetchEmployees(currentPage, pageSize);
+    } catch (error) {
+      message.error('Failed to delete employee');
+    }
+  };
+
+  const filteredEmployees = employees.filter((employee) =>
+    employee.username.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  const columns = [
+    { title: 'Username', dataIndex: 'username', key: 'username' },
+    { title: 'First Name', dataIndex: 'firstName', key: 'firstName' },
+    { title: 'Last Name', dataIndex: 'lastName', key: 'lastName' },
+    { title: 'Email', dataIndex: 'mail', key: 'mail' },
+    { title: 'Salary', dataIndex: 'salary', key: 'salary' },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 150,
+      className: 'text-end',
+      render: (_: any, record: Employee) => (
+        <>
+          <Button type="link" className="p-2" onClick={() => setViewingEmployee(record)}><EyeOutlined/></Button>
+          <Button type="link" className="p-2" onClick={() => { setEditingEmployee(record); setIsModalVisible(true); }}><EditOutlined/></Button>
+          <Popconfirm
+            title="Are you sure to delete this employee?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" className="p-2" danger><DeleteOutlined/></Button>
+          </Popconfirm>
+        </>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    if (keycloak.authenticated && keycloak.didInitialize) {
+      fetchEmployees();
+    }
+  }, [keycloak.authenticated ,keycloak.didInitialize])
+
+  return (
+    <div className="p-2">
+      <h1>Employee Management</h1>
+
+      <Search
+        placeholder="Search employees" className="me-2"
+        onSearch={(value) => setKeyword(value)}
+        onChange={(e) => setKeyword(e.target.value)}
+        style={{ width: 300, marginBottom: 16 }}
+      />
+
+      <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }}>
+        Create New Employee
+      </Button>
+
+      <Table
+        columns={columns}
+        dataSource={filteredEmployees}
+        rowKey="username"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
+          onChange: (page, pageSize) => {
+            setCurrentPage(page);
+            setPageSize(pageSize);
+            fetchEmployees(page, pageSize);
+          },
+        }}
+      />
+
+      {/* Create/Edit Modal */}
+      <Modal
+        title={editingEmployee ? 'Edit Employee' : 'Create Employee'}
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <BaseForm isSubmitting={submitting}
+          fields={employeeFields}
+          onFinish={handleFinish}
+          initialValues={editingEmployee || {}}
+        />
+      </Modal>
+
+      {/* View Employee Modal */}
+      <Modal
+        title="Employee Details"
+        visible={!!viewingEmployee}
+        onCancel={() => setViewingEmployee(null)}
+        footer={[
+          <Button key="close" onClick={() => setViewingEmployee(null)}>Close</Button>,
+        ]}
+      >
+        {viewingEmployee && (
+          <div>
+            <p><strong>Username:</strong> {viewingEmployee.username}</p>
+            <p><strong>First Name:</strong> {viewingEmployee.firstName}</p>
+            <p><strong>Last Name:</strong> {viewingEmployee.lastName}</p>
+            <p><strong>Email:</strong> {viewingEmployee.mail}</p>
+            <p><strong>Phone:</strong> {viewingEmployee.phoneNo}</p>
+            <p><strong>Salary:</strong> {viewingEmployee.salary}</p>
+            <p><strong>Address:</strong> {viewingEmployee.address}</p>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+export default Employees;
