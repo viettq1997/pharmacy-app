@@ -30,4 +30,10 @@ export const MenuItems: ItemType<MenuItemType & { path?: string }>[] = [
     label: "nav 3",
     path: "/nav2",
   },
+  {
+    key: "employee-management",
+    icon: <UserOutlined />,
+    label: "Employee",
+    path: "/employee",
+  },
 ]

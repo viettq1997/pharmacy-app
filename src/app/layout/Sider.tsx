@@ -9,7 +9,11 @@ const AppSider = () => {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
 
-  const handleSelectMenu = (key: string) => {}
+  const handleSelectMenu = (e: any) => {
+    console.log(e)
+    // console.log(key)
+    // const menu = MenuItems.find((x: MenuItemType) => x.key === key)
+  }
 
   return (
     <Layout.Sider
@@ -43,7 +47,7 @@ const AppSider = () => {
           mode="inline"
           defaultOpenKeys={["1"]}
           defaultSelectedKeys={["1-1"]}
-          onSelect={({ key }) => handleSelectMenu(key)}
+          onSelect={(e) => handleSelectMenu(e)}
           items={MenuItems}
         />
       </MacScrollbar>
