@@ -1,33 +1,57 @@
-import {DashboardOutlined, InboxOutlined, UserOutlined} from "@ant-design/icons"
-import { ItemType, MenuItemType } from "antd/es/menu/interface"
-import { lazy } from "react"
-import { RouteObject } from "react-router-dom"
-import Employees from "@/pages/employee/Employees.tsx";
+import { Subject } from "@/hooks/useAbility"
+import {
+  DashboardOutlined,
+  InboxOutlined,
+  MedicineBoxOutlined,
+  UserOutlined,
+} from "@ant-design/icons"
+import { lazy, ReactElement } from "react"
 
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"))
 const Supplier = lazy(() => import("@/pages/supplier/Supplier"))
+const Medicine = lazy(() => import("@/pages/medicine/MedicineContext"))
+const Employees = lazy(() => import("@/pages/employee/Employees"))
 
-export const RouterData: (RouteObject &
-  ItemType<MenuItemType & { path?: string }>)[] = [
+type TRouteData = {
+  key: string
+  subject?: Subject
+  index?: boolean
+  icon?: ReactElement
+  label: string
+  path?: string
+  element: ReactElement
+}
+
+export const RouterData: TRouteData[] = [
   {
-		key: "/",
+    key: "/",
     index: true,
-    icon: <DashboardOutlined />,
     label: "Dashboard",
+    icon: <DashboardOutlined />,
     element: <Dashboard />,
   },
   {
     key: "/supplier",
-    icon: <InboxOutlined />,
-    label: "Supplier",
     path: "/supplier",
+    label: "Supplier",
+    subject: "supplier",
+    icon: <InboxOutlined />,
     element: <Supplier />,
   },
   {
+    key: "/medicine",
+    path: "/medicine",
+    label: "Medicine",
+    subject: "medicine",
+    icon: <MedicineBoxOutlined />,
+    element: <Medicine />,
+  },
+  {
     key: "/employee",
-    icon: <UserOutlined />,
-    label: "Employee",
     path: "/employee",
+    label: "Employee",
+    subject: "employee",
+    icon: <UserOutlined />,
     element: <Employees />,
   },
 ]
