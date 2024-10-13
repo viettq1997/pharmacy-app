@@ -39,10 +39,10 @@ const Employees: React.FC = () => {
   const [total, setTotal] = useState(0);
   const {keycloak} = useKeycloak();
 
-  const {apiPost, apiPut, apiGet, apiDelete} = useApi();
+  const {post, put, get, del} = useApi();
   const fetchEmployees = async (_page: number = currentPage, _size: number = pageSize) => {
     try {
-      const response = await apiGet(`/employees`);
+      const response = await get(`/employees`);
       const { data } = response;
       setEmployees(data.content);
       setTotal(data.totalElement);
@@ -56,10 +56,10 @@ const Employees: React.FC = () => {
     setSubmitting(true)
     try {
       if (editingEmployee) {
-        await apiPut(`/employees/${editingEmployee.id}`, values);
+        await put(`/employees`,editingEmployee.id as string, values);
         message.success('Employee updated successfully');
       } else {
-        await apiPost('/employees', values);
+        await post('/employees', values);
         message.success('Employee created successfully');
       }
       setIsModalVisible(false);
@@ -73,7 +73,7 @@ const Employees: React.FC = () => {
 
   const handleDelete = async (id: any) => {
     try {
-      await apiDelete(`/employees/${id}`);
+      await del(`/employees`, id);
       message.success('Employee deleted successfully');
       fetchEmployees(currentPage, pageSize);
     } catch (error) {

@@ -11,7 +11,7 @@ const useApi = () => {
     timeout: 10000,
     withCredentials: true,
     headers: {
-      Authorization: token,
+      Authorization: `Bearer ${token}`,
     },
   })
 
@@ -30,9 +30,6 @@ const useApi = () => {
   const post = async (url: string, body: Record<string, any>) => {
     try {
       const res = await api.post(url, body)
-      notification.success({
-        message: res.data.message,
-      })
       if (res.data) return true
       return false
     } catch (e: any) {
@@ -46,9 +43,6 @@ const useApi = () => {
   const put = async (url: string, id: string, body: Record<string, any>) => {
     try {
       const res = await api.put(`${url}/${id}`, body)
-      notification.success({
-        message: res.data.message,
-      })
       if (res.data) return true
       return false
     } catch (e: any) {
@@ -62,9 +56,6 @@ const useApi = () => {
   const del = async (url: string, id: string) => {
     try {
       const res = await api.delete(`${url}/${id}`)
-      notification.success({
-        message: res.data.message,
-      })
       if (res.data) return true
       return false
     } catch (e: any) {
