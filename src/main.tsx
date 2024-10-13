@@ -1,22 +1,21 @@
-import router from "@/app/router"
 import { ReactKeycloakProvider } from "@react-keycloak/web"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { App, ConfigProvider, Spin } from "antd"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
 import Keycloak from "keycloak-js"
 import "mac-scrollbar/dist/mac-scrollbar.css"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import { RouterProvider } from "react-router-dom"
+import AppProvider from "./app"
 import "./index.css"
 
-const queryClient = new QueryClient()
-const keycloakConfig = {
-  url: "http://localhost:8080",
-  realm: "pms-realm",
-  clientId: "frontend-client",
-}
+dayjs.extend(utc)
 
-const keycloak = new Keycloak(keycloakConfig)
+const keycloak = new Keycloak({
+  url: "http://localhost:9090",
+  realm: "pharmacy-management",
+  clientId: "pharmacy-management-system",
+})
+
 createRoot(document.getElementById("root")!).render(
   <ReactKeycloakProvider
     authClient={keycloak}
@@ -25,22 +24,7 @@ createRoot(document.getElementById("root")!).render(
     }}
   >
     <StrictMode>
-      <ConfigProvider>
-        <App
-          notification={{
-            duration: 3,
-            maxCount: 3,
-            pauseOnHover: true,
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider
-              router={router}
-              fallbackElement={<Spin fullscreen size="large" />}
-            />
-          </QueryClientProvider>
-        </App>
-      </ConfigProvider>
+      <AppProvider />
     </StrictMode>
   </ReactKeycloakProvider>
 )
