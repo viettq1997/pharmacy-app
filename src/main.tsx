@@ -11,9 +11,9 @@ import {ReactKeycloakProvider} from "@react-keycloak/web";
 
 const queryClient = new QueryClient()
 const keycloakConfig = {
-  url: 'http://localhost:8080',
-  realm: 'pms-realm',
-  clientId: 'frontend-client',
+  url: 'http://localhost:9090',
+  realm: 'pharmacy-management',
+  clientId: 'pharmacy-management-system',
 };
 
 const keycloak = new Keycloak(keycloakConfig);
