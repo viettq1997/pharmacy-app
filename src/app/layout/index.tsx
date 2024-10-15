@@ -12,9 +12,10 @@ const AppLayout = () => {
   const [cookies, setCookie] = useCookies(["token"])
 
   useEffect(() => {
-    if (keycloak.authenticated && !cookies.token)
-      setCookie("token", keycloak.token)
-  }, [keycloak, cookies])
+    setCookie("token", keycloak.token)
+    console.log(keycloak)
+    keycloak.loadUserInfo().then(console.log)
+  }, [keycloak.token, cookies])
 
   return (
     <>
