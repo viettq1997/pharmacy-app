@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Modal, Button, Input, Popconfirm, message } from 'antd';
+import {Table, Modal, Button, Input, Popconfirm, message, Card} from 'antd';
 import BaseForm from '@/components/BaseForm';
 import { Employee } from '@/types/EmployeeTypes';
 import {Field} from "@/types/FieldTypes.ts";
@@ -81,10 +81,6 @@ const Employees: React.FC = () => {
     }
   };
 
-  const filteredEmployees = employees.filter((employee) =>
-    employee.username.toLowerCase().includes(keyword.toLowerCase())
-  );
-
   const columns = [
     { title: 'Username', dataIndex: 'username', key: 'username' },
     { title: 'First Name', dataIndex: 'firstName', key: 'firstName' },
@@ -115,73 +111,75 @@ const Employees: React.FC = () => {
 
   useEffect(() => {
     fetchEmployees();
-  }, [])
+  }, [keyword])
 
   return (
-    <div className="p-2">
-      {/*<h1>Employee Management</h1>*/}
+    <Card>
+      <div className="">
+        {/*<h1>Employee Management</h1>*/}
 
-      <Search
-        placeholder="Search employees" className="me-2"
-        onSearch={(value) => setKeyword(value)}
-        onChange={(e) => setKeyword(e.target.value)}
-        style={{ width: 300, marginBottom: 16 }}
-      />
-
-      <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }}>
-        Create New Employee
-      </Button>
-
-      <Table
-        columns={columns}
-        dataSource={filteredEmployees}
-        rowKey="username"
-        pagination={{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          onChange: (page, pageSize) => {
-            setCurrentPage(page);
-            setPageSize(pageSize);
-            fetchEmployees(page, pageSize);
-          },
-        }}
-      />
-
-      <Modal
-        title={editingEmployee ? 'Edit Employee' : 'Create Employee'}
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
-      >
-        <BaseForm isSubmitting={submitting}
-          fields={employeeFields}
-          onFinish={handleFinish}
-          initialValues={editingEmployee || {}}
+        <Search
+          placeholder="Search employees" className="me-2"
+          onSearch={(value) => setKeyword(value)}
+          onChange={(e) => setKeyword(e.target.value)}
+          style={{width: 300, marginBottom: 16}}
         />
-      </Modal>
 
-      <Modal
-        title="Employee Details"
-        visible={!!viewingEmployee}
-        onCancel={() => setViewingEmployee(null)}
-        footer={[
-          <Button key="close" onClick={() => setViewingEmployee(null)}>Close</Button>,
-        ]}
-      >
-        {viewingEmployee && (
-          <div>
-            <p><strong>Username:</strong> {viewingEmployee.username}</p>
-            <p><strong>First Name:</strong> {viewingEmployee.firstName}</p>
-            <p><strong>Last Name:</strong> {viewingEmployee.lastName}</p>
-            <p><strong>Email:</strong> {viewingEmployee.mail}</p>
-            <p><strong>Phone:</strong> {viewingEmployee.phoneNo}</p>
-            <p><strong>Salary:</strong> {viewingEmployee.salary}</p>
-            <p><strong>Address:</strong> {viewingEmployee.address}</p>
-          </div>
-        )}
-      </Modal>
-    </div>
+        <Button type="primary" onClick={() => setIsModalVisible(true)} style={{marginBottom: 16}}>
+          Create New Employee
+        </Button>
+
+        <Table
+          columns={columns}
+          dataSource={employees}
+          rowKey="username"
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: total,
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize);
+              fetchEmployees(page, pageSize);
+            },
+          }}
+        />
+
+        <Modal
+          title={editingEmployee ? 'Edit Employee' : 'Create Employee'}
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={null}
+        >
+          <BaseForm isSubmitting={submitting}
+                    fields={employeeFields}
+                    onFinish={handleFinish}
+                    initialValues={editingEmployee || {}}
+          />
+        </Modal>
+
+        <Modal
+          title="Employee Details"
+          visible={!!viewingEmployee}
+          onCancel={() => setViewingEmployee(null)}
+          footer={[
+            <Button key="close" onClick={() => setViewingEmployee(null)}>Close</Button>,
+          ]}
+        >
+          {viewingEmployee && (
+            <div>
+              <p><strong>Username:</strong> {viewingEmployee.username}</p>
+              <p><strong>First Name:</strong> {viewingEmployee.firstName}</p>
+              <p><strong>Last Name:</strong> {viewingEmployee.lastName}</p>
+              <p><strong>Email:</strong> {viewingEmployee.mail}</p>
+              <p><strong>Phone:</strong> {viewingEmployee.phoneNo}</p>
+              <p><strong>Salary:</strong> {viewingEmployee.salary}</p>
+              <p><strong>Address:</strong> {viewingEmployee.address}</p>
+            </div>
+          )}
+        </Modal>
+      </div>
+    </Card>
   );
 };
 

@@ -18,6 +18,7 @@ export type Subject =
   | "supplier"
   | "stockPurchase"
   | "employee"
+  | "pharmacy-pos"
   | "customer"
   | "saleTransaction"
   | "report"
@@ -48,10 +49,12 @@ const useAbility = () => {
         "report",
         "saleTransaction",
         "stockPurchase",
+        "pharmacy-pos",
         "supplier",
       ]
     )
   if (role === Role.USER) {
+    can(["create", "read", "update", "delete"], "pharmacy-pos")
     can("read", "medicine")
     can("read", "customer")
     can("readOwn", "saleTransaction")

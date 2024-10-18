@@ -13,8 +13,6 @@ const AppLayout = () => {
 
   useEffect(() => {
     setCookie("token", keycloak.token)
-    console.log(keycloak)
-    keycloak.loadUserInfo().then(console.log)
   }, [keycloak.token, cookies])
 
   return (
@@ -28,7 +26,7 @@ const AppLayout = () => {
             spinning
             size="large"
             className="fixed top-[calc(50%-16px)] left-[calc(50%-16px)] z-50"
-          />
+          />`
         </>
       )}
       <Layout className={cn("w-screen h-screen")}>
