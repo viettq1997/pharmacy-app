@@ -4,14 +4,24 @@ import { App, ConfigProvider, Spin } from "antd"
 import { CookiesProvider } from "react-cookie"
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { RouterData } from "./data"
-import AppLayout from "./layout"
+import AppLayout from "./layout/Layout"
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchIntervalInBackground: true,
-      refetchInterval: 1000 * 60,
       refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        if (error.status === 401) return failureCount < 10
+        return false
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      retry: (failureCount, error: any) => {
+        if (error.status === 401) return failureCount < 10
+        return false
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
   },
 })

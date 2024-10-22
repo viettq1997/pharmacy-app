@@ -1,36 +1,33 @@
 import {
-  CREATE_MEDICINE,
-  DELETE_MEDICINE,
-  GET_MEDICINES_PAGINATION,
-  UPDATE_MEDICINE,
-} from "@/api/medicine.api"
-import { GET_MEDICINE_CATEGORIES_PAGINATION } from "@/api/medicineCategory.api"
+  CREATE_MEDICINE_CATEGORY,
+  DELETE_MEDICINE_CATEGORY,
+  GET_MEDICINE_CATEGORIES_PAGINATION,
+  UPDATE_MEDICINE_CATEGORY,
+} from "@/api/medicineCategory.api"
 import useApi from "@/hooks/useApi"
 import { TFilter } from "@/types/CommonTypes"
 import { convertISODate, objectIsEmpty } from "@/utils/function"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { App } from "antd"
 import { createContext, useEffect, useState } from "react"
-import { TDataGetMedicineCategory } from "../medicineCategory/MedicineCategory.type"
-import Medicine from "./Medicine"
-import { TDataGetMedicine, TInfoContext } from "./Medicine.type"
+import MedicineCategory from "./MedicineCategory"
+import { TDataGetMedicineCategory, TInfoContext } from "./MedicineCategory.type"
 
 const defaultInfo: TInfoContext = {
   data: [],
-  dataCategory: [],
-  page: 1,
   total: 0,
   loading: true,
   loadingSubmit: false,
+  page: 1,
   setPage: () => {},
   onDelete: () => {},
   onSubmit: () => {},
   onSearch: () => {},
 }
 
-export const MedicineContext = createContext<TInfoContext>(defaultInfo)
+export const MedicineCategoryContext = createContext<TInfoContext>(defaultInfo)
 
-const MedicineProvider = () => {
+const MedicineCategoryProvider = () => {
   const { notification } = App.useApp()
 
   const [typeMutate, setTypeMutate] = useState<
@@ -38,11 +35,11 @@ const MedicineProvider = () => {
   >("created")
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState<TFilter>({})
-  const [info, setInfo] = useState<TInfoContext>({ ...defaultInfo, setPage })
+  const [info, setInfo] = useState<TInfoContext>(defaultInfo)
 
   const { get, post, put, del } = useApi()
-  const { data, isPending, refetch } = useQuery<TDataGetMedicine>({
-    queryKey: ["getMedicines", page, filter],
+  const { data, isPending, refetch } = useQuery<TDataGetMedicineCategory>({
+    queryKey: ["getMedicineCategories", page, filter],
     queryFn: () => {
       const params: any = {
         page: page - 1,
@@ -50,22 +47,15 @@ const MedicineProvider = () => {
       }
       if (!objectIsEmpty(filter))
         Object.keys(filter).forEach((key) => (params[key] = filter[key]))
-      return get(GET_MEDICINES_PAGINATION, params)
+      return get(GET_MEDICINE_CATEGORIES_PAGINATION, params)
     },
   })
-  const { data: dataCategory, isPending: isPendingCategory } =
-    useQuery<TDataGetMedicineCategory>({
-      queryKey: ["getMedicineCategories"],
-      queryFn: () => {
-        return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 })
-      },
-    })
-
   const { data: dataMutate, mutate } = useMutation({
     mutationFn: (values: any) => {
-      if (values.id) return put(UPDATE_MEDICINE, values.id, values)
-      if (typeof values === "string") return del(DELETE_MEDICINE, values)
-      return post(CREATE_MEDICINE, values)
+      if (values.id) return put(UPDATE_MEDICINE_CATEGORY, values.id, values)
+      if (typeof values === "string")
+        return del(DELETE_MEDICINE_CATEGORY, values)
+      return post(CREATE_MEDICINE_CATEGORY, values)
     },
   })
 
@@ -89,7 +79,6 @@ const MedicineProvider = () => {
   }
 
   useEffect(() => {
-    setInfo((prev) => ({ ...prev, loadingSubmit: false }))
     if (dataMutate) {
       notification.success({
         message: "Success",
@@ -100,46 +89,36 @@ const MedicineProvider = () => {
         setPage(1)
         setFilter({})
       }
-    }
+    } else setInfo((prev) => ({ ...prev, loadingSubmit: false }))
   }, [dataMutate])
 
   useEffect(() => {
-    if (isPending || isPendingCategory)
-      setInfo((prev) => ({ ...prev, loading: true }))
-    else if (data && dataCategory) {
+    if (isPending) setInfo((prev) => ({ ...prev, loading: true }))
+    else if (data) {
       const newData = data.content.map((item) => {
-        const category = dataCategory.content.find(
-          (el) => el.id === item.categoryId
-        )
         if (item.updatedDate)
           item.updatedDate = convertISODate(item.updatedDate)
         return {
           ...item,
-          category: category?.name || "",
           createdDate: convertISODate(item.createdDate),
         }
       })
-      const newDataCategory = dataCategory.content.map((item) => ({
-        label: item.name,
-        value: item.id,
-      }))
       setInfo((prev) => ({
         ...prev,
         data: newData,
-        dataCategory: newDataCategory,
         total: data.totalElement,
         loading: false,
       }))
     }
-  }, [data, dataCategory, isPending, isPendingCategory])
+  }, [data, isPending])
 
   return (
-    <MedicineContext.Provider
+    <MedicineCategoryContext.Provider
       value={{ ...info, page, setPage, onDelete, onSubmit, onSearch }}
     >
-      <Medicine />
-    </MedicineContext.Provider>
+      <MedicineCategory />
+    </MedicineCategoryContext.Provider>
   )
 }
 
-export default MedicineProvider
+export default MedicineCategoryProvider
