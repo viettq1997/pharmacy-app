@@ -21,6 +21,8 @@ export type Subject =
   | "customer"
   | "saleTransaction"
   | "report"
+  | "locationRack"
+  | "medicineCategory"
 
 type Ability = [CRUDAction, Subject]
 
@@ -42,17 +44,20 @@ const useAbility = () => {
     can(
       ["create", "read", "update", "delete"],
       [
-        "customer",
-        "employee",
         "medicine",
-        "report",
-        "saleTransaction",
-        "stockPurchase",
         "supplier",
+        "stockPurchase",
+        "employee",
+        "customer",
+        "saleTransaction",
+        "report",
+        "locationRack",
+        "medicineCategory",
       ]
     )
   if (role === Role.USER) {
     can("read", "medicine")
+    can("read", "locationRack")
     can("read", "customer")
     can("readOwn", "saleTransaction")
   }

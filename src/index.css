@@ -23,3 +23,21 @@ body,
 .ant-spin-fullscreen .ant-spin-dot {
   color: var(--primary-color);
 }
+
+.ant-table-body {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+.ant-table-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ant-table-body::-webkit-scrollbar-track {
+  background-color: #ffffff00;
+}
+
+.ant-table-body::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: #ebebeb;
+}

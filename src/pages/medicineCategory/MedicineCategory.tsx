@@ -1,15 +1,14 @@
 import ContentWrapper from "@/components/ContentWrapper"
 import DrawerForm from "@/components/DrawerForm"
 import Table from "@/components/Table"
-import { memo, useContext, useEffect, useState } from "react"
-import { columns, fields } from "./Medicine.data"
-import { TInfoMedicine } from "./Medicine.type"
-import { MedicineContext } from "./MedicineContext"
+import { useContext, useEffect, useState } from "react"
+import { columns, fields } from "./MedicineCategory.data"
+import { TInfoMedicineCategory } from "./MedicineCategory.type"
+import { MedicineCategoryContext } from "./MedicineCategoryContext"
 
-const Medicine = () => {
+const MedicineCategory = () => {
   const {
     data,
-    dataCategory,
     loading,
     loadingSubmit,
     total,
@@ -18,16 +17,16 @@ const Medicine = () => {
     onDelete,
     onSubmit,
     onSearch,
-  } = useContext(MedicineContext)
+  } = useContext(MedicineCategoryContext)
 
   const [open, setOpen] = useState(false)
   const [typeForm, setTypeForm] = useState<"add" | "edit">("add")
-  const [initialValues, setInitialValues] = useState<TInfoMedicine>()
+  const [initialValues, setInitialValues] = useState<TInfoMedicineCategory>()
 
   const handleOpen = (
     isOpen: boolean,
     typeForm: "add" | "edit",
-    initialValues?: TInfoMedicine
+    initialValues?: TInfoMedicineCategory
   ) => {
     setOpen(isOpen)
     setTypeForm(typeForm)
@@ -55,10 +54,13 @@ const Medicine = () => {
         setPage={setPage}
       />
       <DrawerForm
-        width={500}
-        title={typeForm === "add" ? "Create Medicine" : "Edit Medicine"}
+        title={
+          typeForm === "add"
+            ? "Create Medicine Category"
+            : "Edit Medicine Category"
+        }
         open={open}
-        fields={fields(dataCategory)}
+        fields={fields()}
         loading={loadingSubmit}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}
@@ -68,4 +70,4 @@ const Medicine = () => {
   )
 }
 
-export default memo(Medicine)
+export default MedicineCategory

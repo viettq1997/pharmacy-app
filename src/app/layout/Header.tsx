@@ -26,7 +26,7 @@ const AppHeader = () => {
             items: [
               {
                 key: "email",
-                label: keycloak.tokenParsed?.name || "",
+                label: keycloak.tokenParsed?.name,
                 className: "pointer-events-none",
               },
               {
