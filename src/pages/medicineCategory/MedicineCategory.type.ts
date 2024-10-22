@@ -1,10 +1,7 @@
-export type TInfoMedicine = {
+export type TInfoMedicineCategory = {
   id: string
   name: string
-  price: number
-  categoryId: string
-  category: string
-  locationRack: string
+  description: string
   createdDate: string
   updatedDate: string
   createdBy: string
@@ -12,8 +9,7 @@ export type TInfoMedicine = {
 }
 
 export type TInfoContext = {
-  data: TInfoMedicine[]
-  dataCategory: { label: string; value: string }[]
+  data: TInfoMedicineCategory[]
   page: number
   total: number
   loading: boolean
@@ -24,8 +20,8 @@ export type TInfoContext = {
   onSearch: (key: string, value: any) => void
 }
 
-export type TDataGetMedicine = {
-  content: TInfoMedicine[]
+export type TDataGetMedicineCategory = {
+  content: TInfoMedicineCategory[]
   totalElement: number
   size: number
   number: number

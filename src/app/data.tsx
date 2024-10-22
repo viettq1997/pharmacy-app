@@ -10,6 +10,9 @@ import { lazy, ReactElement } from "react"
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"))
 const Supplier = lazy(() => import("@/pages/supplier/Supplier"))
 const Medicine = lazy(() => import("@/pages/medicine/MedicineContext"))
+const MedicineCategory = lazy(
+  () => import("@/pages/medicineCategory/MedicineCategoryContext")
+)
 const Employees = lazy(() => import("@/pages/employee/Employees"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/Customers"))
@@ -47,6 +50,14 @@ export const RouterData: TRouteData[] = [
     subject: "medicine",
     icon: <MedicineBoxOutlined />,
     element: <Medicine />,
+  },
+  {
+    key: "/medicine-category",
+    path: "/medicine-category",
+    label: "Medicine Category",
+    subject: "medicineCategory",
+    icon: <MedicineBoxOutlined />,
+    element: <MedicineCategory />,
   },
   {
     key: "/employee",
