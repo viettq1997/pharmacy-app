@@ -9,7 +9,7 @@ import AppSider from "./Sider"
 
 const AppLayout = () => {
   const { keycloak, initialized } = useKeycloak()
-  const [cookies, setCookie, removeCookie] = useCookies(["token"])
+  const [{ token }, setCookie, removeCookie] = useCookies(["token"])
 
   useEffect(() => {
     if (initialized) {
@@ -17,8 +17,8 @@ const AppLayout = () => {
         setCookie("token", keycloak.token)
       }
       keycloak.onAuthRefreshError = () => {
-        keycloak.logout()
         removeCookie("token")
+        keycloak.logout()
       }
     }
     return () => {
@@ -27,9 +27,8 @@ const AppLayout = () => {
   }, [initialized])
 
   useEffect(() => {
-    if (keycloak.authenticated && !cookies.token)
-      setCookie("token", keycloak.token)
-  }, [keycloak, cookies])
+    if (keycloak.authenticated && !token) setCookie("token", keycloak.token)
+  }, [keycloak, token, initialized])
 
   return (
     <>

@@ -11,8 +11,8 @@ const AppHeader = () => {
   const [_cookies, _setCookie, removeCookie] = useCookies(["token"])
 
   const handleLogout = () => {
-    keycloak.logout()
     removeCookie("token")
+    keycloak.logout()
   }
 
   return (
