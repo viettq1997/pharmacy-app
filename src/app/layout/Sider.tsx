@@ -1,3 +1,4 @@
+import { RouterData } from "@/app/App.data"
 import useAbility from "@/hooks/useAbility"
 import { atomApp } from "@/states/app"
 import { cn } from "@/utils/function"
@@ -6,7 +7,6 @@ import { useSetAtom } from "jotai"
 import { MacScrollbar } from "mac-scrollbar"
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { RouterData } from "../data"
 
 const AppSider = () => {
   const setAppState = useSetAtom(atomApp)
