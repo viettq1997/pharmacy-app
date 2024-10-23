@@ -5,7 +5,7 @@ import Keycloak from "keycloak-js"
 import "mac-scrollbar/dist/mac-scrollbar.css"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import AppProvider from "./app"
+import AppProvider from "./app/App"
 import "./index.css"
 
 dayjs.extend(utc)
