@@ -1,6 +1,7 @@
 import ContentWrapper from "@/components/ContentWrapper"
 import DrawerForm from "@/components/DrawerForm"
 import Table from "@/components/Table"
+import { Select } from "antd"
 import { memo, useContext, useEffect, useState } from "react"
 import { columns, fields } from "./Medicine.data"
 import { TInfoMedicine } from "./Medicine.type"
@@ -40,6 +41,22 @@ const Medicine = () => {
 
   return (
     <ContentWrapper
+      filterElement={
+        <>
+          <Select
+            allowClear
+            showSearch
+            size="large"
+            placeholder="Category"
+            options={dataCategory}
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            onChange={(value) => onSearch("categoryId", value)}
+            className="w-[150px]"
+          />
+        </>
+      }
       onAdd={() => handleOpen(true, "add")}
       onSearch={(keyword) => onSearch("name", keyword)}
     >
