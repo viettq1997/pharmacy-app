@@ -1,27 +1,25 @@
 import useApi from '@/hooks/useApi';
+import { convertISODate } from '@/utils/function';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, Drawer, Flex, Form, Input, Popconfirm, Space, Table, TableProps } from 'antd';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     MutationActions,
-    TGetSupplierData,
-    TGetSupplierResponse,
-    TSupplierInfo
-} from './Supplier.type';
-import SupplierForm from './SupplierForm';
+    TGetLocationRackData,
+    TGetLocationRackResponse,
+    TLocationRackInfo
+} from './LocationRack.type';
+
+const defaultFilters: any = {
+    position: '',
+    page: 0,
+    size: 20
+};
 
 const defaultFormData: any = {
     id: null,
-    name: '',
-    address: '',
-    phoneNo: '',
-    mail: ''
-};
-
-const defaultFilters: any = {
-    name: '',
-    page: 0,
-    size: 20
+    position: '',
+    createdDate: ''
 };
 
 const getMutationMessage = (isSuccessful: unknown) => {
@@ -32,80 +30,62 @@ const getMutationMessage = (isSuccessful: unknown) => {
     };
 };
 
-const Supplier = () => {
+const LocationRack = () => {
     const { get, post, put, del } = useApi();
+    const [getLocationRackData, setGetLocationRackData] = useState<TGetLocationRackData>();
     const [filters, setFilters] = useState(defaultFilters);
-    const [formInstance] = Form.useForm();
-    const [getSupplierData, setGetSupplierData] = useState<TGetSupplierData>();
-    const { notification } = App.useApp();
     const {
-        data: getSupplierResponse,
+        data: getLocationRackResponse,
         status: getStatus,
         refetch
-    } = useQuery<TGetSupplierResponse>({
-        queryKey: ['getSuppliers', filters],
-        queryFn: () => get('/suppliers', filters)
+    } = useQuery<TGetLocationRackResponse>({
+        queryKey: ['getLocationRacks', filters],
+        queryFn: () => get('/locationRacks', filters)
     });
-    const [keyword, setKeyword] = useState('');
     const { mutate } = useMutation({
         mutationFn: ({ action, params }: { action: MutationActions; params: any }) => {
-            if (action == MutationActions.CREATE) return post('/suppliers', params);
-            if (action == MutationActions.EDIT) return put('/suppliers', params.id, params);
-            if (action == MutationActions.DELETE) return del('/suppliers', params.id);
+            if (action == MutationActions.CREATE) return post('/locationRacks', params);
+            if (action == MutationActions.EDIT) return put('/locationRacks', params.id, params);
+            if (action == MutationActions.DELETE) return del('/locationRacks', params.id);
 
             return new Promise(() => {});
         }
     });
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [formData, setFormData] = useState<TSupplierInfo>(defaultFormData);
-
-    useEffect(() => {
-        if (getSupplierResponse && getSupplierResponse.data && getStatus == 'success') {
-            setGetSupplierData(getSupplierResponse.data);
-        }
-    }, [getSupplierResponse]);
-
-    useEffect(() => {
-        formInstance.setFieldsValue(formData);
-    }, [formData, formInstance]);
-
-    const columns: TableProps<TSupplierInfo>['columns'] = [
+    const columns: TableProps<TLocationRackInfo>['columns'] = [
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name'
+            title: 'Position',
+            dataIndex: 'position',
+            key: 'position'
+        },
+
+        {
+            title: 'Created Date',
+            dataIndex: 'createdDate',
+            key: 'createdDate'
         },
         {
-            title: 'Address',
-            dataIndex: 'address',
-            key: 'address'
-        },
-        {
-            title: 'Phone number',
-            dataIndex: 'phoneNo',
-            key: 'phoneNo'
-        },
-        {
-            title: 'Email',
-            dataIndex: 'mail',
-            key: 'mail'
+            title: 'Created By',
+            dataIndex: 'createdBy',
+            key: 'createdBy'
         },
         {
             title: 'Action',
             key: 'action',
-            render: (_, supplier) => (
+            render: (_, locationRack) => (
                 <Space size="middle">
                     <a
                         onClick={() => {
-                            selectEditedSupplier(supplier);
+                            selectEditedLocationRack(locationRack);
                         }}
                     >
                         Edit
                     </a>
                     <Popconfirm
-                        onConfirm={() => removeSupplier(supplier.id)}
-                        title="Confirm to delete the supplier"
-                        description="Are you sure to delete this supplier?"
+                        onConfirm={() => {
+                            removeLocationRack(locationRack.id);
+                        }}
+                        title="Confirm to delete the location"
+                        description="Are you sure to delete this location?"
                     >
                         <a>Delete</a>
                     </Popconfirm>
@@ -113,6 +93,20 @@ const Supplier = () => {
             )
         }
     ];
+    const [formData, setFormData] = useState<TLocationRackInfo>(defaultFormData);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [formInstance] = Form.useForm();
+    const { notification } = App.useApp();
+    const [keyword, setKeyword] = useState('');
+
+    useEffect(() => {
+        if (getLocationRackResponse && getLocationRackResponse.data && getStatus == 'success')
+            setGetLocationRackData(getLocationRackResponse.data);
+    }, [getLocationRackResponse]);
+
+    useEffect(() => {
+        formInstance.setFieldsValue(formData);
+    }, [formData, formInstance]);
 
     const openForm = () => {
         setIsFormOpen(true);
@@ -123,12 +117,19 @@ const Supplier = () => {
         setFormData(defaultFormData);
     };
 
-    const selectEditedSupplier = (supplier: TSupplierInfo) => {
-        setFormData(supplier);
+    const onSearch = (value: string) => {
+        setFilters({
+            ...defaultFilters,
+            position: value
+        });
+    };
+
+    const selectEditedLocationRack = (locationRack: TLocationRackInfo) => {
+        setFormData(locationRack);
         openForm();
     };
 
-    const mutateSupplier = (action: MutationActions, params: any) => {
+    const mutateLocationRack = (action: MutationActions, params: any) => {
         mutate(
             { action, params },
             {
@@ -149,18 +150,18 @@ const Supplier = () => {
                             }
                         }
 
-                        if (action == MutationActions.EDIT && getSupplierData) {
+                        if (action == MutationActions.EDIT && getLocationRackData) {
                             if (
                                 Object.keys(filters).every(
                                     key => defaultFilters[key] == filters[key]
                                 )
                             ) {
-                                const { content } = getSupplierData;
+                                const { content } = getLocationRackData;
 
-                                setGetSupplierData({
-                                    ...getSupplierData,
-                                    content: content.map(supplier =>
-                                        supplier.id == formData.id ? formData : supplier
+                                setGetLocationRackData({
+                                    ...getLocationRackData,
+                                    content: content.map(locationRack =>
+                                        locationRack.id == formData.id ? formData : locationRack
                                     )
                                 });
                             } else {
@@ -180,56 +181,58 @@ const Supplier = () => {
         );
     };
 
-    const createSupplier = () => {
-        mutateSupplier(MutationActions.CREATE, formData);
+    const createLocationRack = () => {
+        mutateLocationRack(MutationActions.CREATE, formData);
     };
 
-    const editSupplier = () => {
-        mutateSupplier(MutationActions.EDIT, formData);
+    const editLocationRack = () => {
+        mutateLocationRack(MutationActions.EDIT, formData);
     };
 
-    const removeSupplier = (id: string | null) => {
-        mutateSupplier(MutationActions.DELETE, { id });
+    const removeLocationRack = (id: string | null) => {
+        mutateLocationRack(MutationActions.DELETE, { id });
     };
 
     const finish = () => {
-        if (formData.id) editSupplier();
-        else createSupplier();
+        if (formData.id) {
+            editLocationRack();
+        } else {
+            createLocationRack();
+        }
     };
 
-    const search = (keyword: string) => {
-        setFilters({ ...defaultFilters, name: keyword });
-    };
-
-    let suppliers: TSupplierInfo[] = [],
+    let locationRacks: TLocationRackInfo[] = [],
         totalElement = 0;
 
-    if (getSupplierData) {
-        suppliers = getSupplierData.content;
-        totalElement = getSupplierData.totalElement;
+    if (getLocationRackData) {
+        locationRacks = getLocationRackData.content.map(locationRack => ({
+            ...locationRack,
+            createdDate: convertISODate(locationRack.createdDate)
+        }));
+        totalElement = getLocationRackData.totalElement;
     }
 
     return (
         <Flex gap="middle" vertical>
             <Flex justify="space-between" gap={16}>
                 <Input.Search
-                    placeholder="Search supplier..."
+                    placeholder="Search position..."
                     allowClear
-                    onSearch={search}
                     style={{ width: 320 }}
                     onClear={() => {
                         setFilters(defaultFilters);
                     }}
+                    onSearch={onSearch}
                     onChange={event => setKeyword(event.target.value)}
                     value={keyword}
                 />
                 <Button className="w-fit" type="primary" onClick={openForm}>
-                    New supplier
+                    New position
                 </Button>
             </Flex>
-            <Table<TSupplierInfo>
+            <Table<TLocationRackInfo>
                 columns={columns}
-                dataSource={suppliers}
+                dataSource={locationRacks}
                 loading={getStatus == 'pending'}
                 pagination={{
                     current: filters.page + 1,
@@ -244,7 +247,7 @@ const Supplier = () => {
                 }}
             />
             <Drawer
-                title={formData.id ? 'Edit a supplier' : 'Create a new supplier'}
+                title={formData.id ? 'Edit a location rack' : 'Create a new location rack'}
                 size="large"
                 onClose={closeForm}
                 open={isFormOpen}
@@ -257,15 +260,29 @@ const Supplier = () => {
                     </Space>
                 }
             >
-                <SupplierForm
-                    data={formData}
+                <Form
+                    onValuesChange={changedValues => {
+                        setFormData({
+                            ...formData,
+                            ...changedValues
+                        });
+                    }}
+                    initialValues={formData}
+                    layout="vertical"
                     onFinish={finish}
-                    onChange={setFormData}
-                    formInstance={formInstance}
-                />
+                    form={formInstance}
+                >
+                    <Form.Item
+                        name="position"
+                        label="Position"
+                        rules={[{ required: true, message: 'Please enter position' }]}
+                    >
+                        <Input placeholder="Please enter position" />
+                    </Form.Item>
+                </Form>
             </Drawer>
         </Flex>
     );
 };
 
-export default memo(Supplier);
+export default LocationRack;

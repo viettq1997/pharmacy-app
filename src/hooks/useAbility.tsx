@@ -60,6 +60,7 @@ const useAbility = () => {
     can("read", "locationRack")
     can("read", "customer")
     can("readOwn", "saleTransaction")
+    can("read", "locationRack")
   }
 
   return build()

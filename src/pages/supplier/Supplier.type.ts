@@ -1,7 +1,7 @@
 import { FormInstance } from 'antd';
 
 export type TSupplierInfo = {
-    id: number | null;
+    id: string | null;
     name?: string;
     address?: string;
     phoneNo?: string;

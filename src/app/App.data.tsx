@@ -1,6 +1,7 @@
 import { Subject } from "@/hooks/useAbility"
 import {
   DashboardOutlined,
+  HddOutlined,
   InboxOutlined,
   MedicineBoxOutlined,
   UserOutlined,
@@ -14,6 +15,7 @@ const MedicineCategory = lazy(
   () => import("@/pages/medicineCategory/MedicineCategoryContext")
 )
 const Employees = lazy(() => import("@/pages/employee/Employees"))
+const LocationRack = lazy(() => import("@/pages/location-rack/LocationRack"))
 
 type TRouteData = {
   key: string
@@ -64,5 +66,13 @@ export const RouterData: TRouteData[] = [
     subject: "employee",
     icon: <UserOutlined />,
     element: <Employees />,
+  },
+  {
+    key: "/locationRack",
+    path: "/locationRack",
+    label: "Location Rack",
+    subject: "locationRack",
+    icon: <HddOutlined />,
+    element: <LocationRack />,
   },
 ]
