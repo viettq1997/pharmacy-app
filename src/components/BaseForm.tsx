@@ -1,6 +1,6 @@
 // BaseForm.tsx
 import React from 'react';
-import { Form, Input, Button, Select } from 'antd';
+import {Form, Input, Button, Select, DatePicker} from 'antd';
 import {Field} from "@/types/FieldTypes.ts";
 
 interface BaseFormProps {
@@ -25,6 +25,8 @@ const BaseForm: React.FC<BaseFormProps> = ({ fields, onFinish, initialValues, is
         return <Input placeholder={field.placeholder} type="number" />;
       case 'textarea':
         return <Input.TextArea placeholder={field.placeholder} />;
+      case 'date':
+        return <DatePicker  style={{ width: '100%' }} defaultValue={field.placeholder} />
       case 'select':
         return (
           <Select placeholder={field.placeholder}>

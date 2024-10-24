@@ -3,7 +3,7 @@ import {
   DashboardOutlined,
   HddOutlined,
   InboxOutlined,
-  MedicineBoxOutlined,
+  MedicineBoxOutlined, ShoppingCartOutlined, UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons"
 import { lazy, ReactElement } from "react"
@@ -16,6 +16,8 @@ const MedicineCategory = lazy(
 )
 const Employees = lazy(() => import("@/pages/employee/Employees"))
 const LocationRack = lazy(() => import("@/pages/location-rack/LocationRack"))
+const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
+const Customer = lazy(() => import("@/pages/customer/Customers"))
 
 type TRouteData = {
   key: string
@@ -66,6 +68,22 @@ export const RouterData: TRouteData[] = [
     subject: "employee",
     icon: <UserOutlined />,
     element: <Employees />,
+  },
+  {
+    key: "/pharmacy-pos",
+    path: "/pharmacy-pos",
+    label: "POS",
+    subject: "pharmacy-pos",
+    icon: <ShoppingCartOutlined />,
+    element: <PharmacyPOS />,
+  },
+  {
+    key: "/customer",
+    path: "/customer",
+    label: "Customer",
+    subject: "customer",
+    icon: <UsergroupAddOutlined />,
+    element: <Customer />,
   },
   {
     key: "/locationRack",

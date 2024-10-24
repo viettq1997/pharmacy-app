@@ -41,7 +41,7 @@ const AppLayout = () => {
             spinning
             size="large"
             className="fixed top-[calc(50%-16px)] left-[calc(50%-16px)] z-50"
-          />
+          />`
         </>
       )}
       <Layout className={cn("w-screen h-screen")}>
