@@ -7,29 +7,26 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, Popconfirm, Space, TableProps } from 'antd';
 import { memo, useEffect, useState } from 'react';
-import { TGetData, TInfo } from './Supplier.type';
+import { TGetData, TInfo } from './LocationRack.type';
 import {
-    CREATE_SUPPLIER,
-    DELETE_SUPPLIER,
-    GET_SUPPLIER,
-    UPDATE_SUPPLIER
-} from '@/api/supplier.api';
+    CREATE_LOCATION_RACK,
+    DELETE_LOCATION_RACK,
+    GET_LOCATION_RACK,
+    UPDATE_LOCATION_RACK
+} from '@/api/locationRack.api';
 
 const defaultInitialValues: any = {
     id: null,
-    name: '',
-    address: '',
-    phoneNo: '',
-    mail: ''
+    position: ''
 };
 
 const defaultFilters: any = {
-    name: '',
+    position: '',
     page: 0,
     size: 20
 };
 
-const Supplier = () => {
+const LocationRack = () => {
     const { get, post, put, del } = useApi();
     const [open, setOpen] = useState(false);
     const [initialValues, setInitialValues] = useState<TInfo>(defaultInitialValues);
@@ -41,14 +38,14 @@ const Supplier = () => {
         status: getStatus,
         refetch
     } = useQuery<TGetData>({
-        queryKey: ['getSuppliers', filters],
-        queryFn: () => get(GET_SUPPLIER, filters)
+        queryKey: ['getLocationRacks', filters],
+        queryFn: () => get(GET_LOCATION_RACK, filters)
     });
     const { mutate, status: mutationStatus } = useMutation({
         mutationFn: (values: any) => {
-            if (values.id) return put(UPDATE_SUPPLIER, values.id, values);
-            if (typeof values == 'string') return del(DELETE_SUPPLIER, values);
-            return post(CREATE_SUPPLIER, values);
+            if (values.id) return put(UPDATE_LOCATION_RACK, values.id, values);
+            if (typeof values == 'string') return del(DELETE_LOCATION_RACK, values);
+            return post(CREATE_LOCATION_RACK, values);
         }
     });
 
@@ -73,20 +70,7 @@ const Supplier = () => {
                     }
 
                     if (status == 'updated' && ok && data) {
-                        if (
-                            Object.keys(filters).every(key => defaultFilters[key] == filters[key])
-                        ) {
-                            const { content } = data;
-
-                            setData({
-                                ...data,
-                                content: content.map((record: TInfo) =>
-                                    record.id == values.id ? values : record
-                                )
-                            });
-                        } else {
-                            refetch();
-                        }
+                        refetch();
                     }
 
                     handleOpen(false);
@@ -117,7 +101,7 @@ const Supplier = () => {
     const onSearch = (keyword: string) => {
         setFilters({
             ...defaultFilters,
-            name: keyword
+            position: keyword
         });
     };
 
@@ -132,24 +116,29 @@ const Supplier = () => {
 
     const columns = [
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name'
+            title: 'Position',
+            dataIndex: 'position',
+            key: 'position'
         },
         {
-            title: 'Address',
-            dataIndex: 'address',
-            key: 'address'
+            title: 'Created Date',
+            dataIndex: 'createdDate',
+            key: 'createdDate'
         },
         {
-            title: 'Phone Number',
-            dataIndex: 'phoneNo',
-            key: 'phoneNo'
+            title: 'Created By',
+            dataIndex: 'createdBy',
+            key: 'createdBy'
         },
         {
-            title: 'Email',
-            dataIndex: 'mail',
-            key: 'mail'
+            title: 'Updated Date',
+            dataIndex: 'updatedDate',
+            key: 'updatedDate'
+        },
+        {
+            title: 'Updated By',
+            dataIndex: 'updatedBy',
+            key: 'updatedBy'
         },
         {
             key: 'action',
@@ -173,32 +162,11 @@ const Supplier = () => {
 
     const fields: Field[] = [
         {
-            label: 'Name',
-            name: 'name',
+            label: 'Position',
+            name: 'position',
             type: 'text',
-            placeholder: 'Name',
-            rules: [{ required: true, message: 'Name is required' }]
-        },
-        {
-            label: 'Address',
-            name: 'address',
-            type: 'text',
-            placeholder: 'Address',
-            rules: [{ required: true, message: 'Address is required' }]
-        },
-        {
-            label: 'Phone Number',
-            name: 'phoneNo',
-            type: 'text',
-            placeholder: 'Phone Number',
-            rules: [{ required: true, message: 'Phone number is required' }]
-        },
-        {
-            label: 'Email',
-            name: 'mail',
-            type: 'email',
-            placeholder: 'Email',
-            rules: [{ type: 'email', message: 'Invalid email' }]
+            placeholder: 'Position',
+            rules: [{ required: true, message: 'Position is required' }]
         }
     ];
 
@@ -228,7 +196,7 @@ const Supplier = () => {
             />
             <DrawerForm
                 open={open}
-                title={initialValues.id ? 'Edit Supplier' : 'Create Supplier'}
+                title={initialValues.id ? 'Edit Location Rack' : 'Create Location Rack'}
                 fields={fields}
                 setOpen={() => handleOpen(false)}
                 onSubmit={values => onSubmit(values, initialValues.id)}
@@ -239,4 +207,4 @@ const Supplier = () => {
     );
 };
 
-export default memo(Supplier);
+export default memo(LocationRack);

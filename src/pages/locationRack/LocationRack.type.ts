@@ -1,14 +1,10 @@
-
 export type TInfo = {
     id: string | null;
-    name?: string;
-    address?: string;
-    phoneNo?: string;
-    mail?: string;
-    createdDate?: string;
+    position: string;
+    createdDate: string;
     createdBy?: string;
-    updatedDate?: string;
-    updatedBy?: string;
+    updatedDate?: string | null;
+    updatedBy?: string | null;
 };
 
 export type TGetData = {

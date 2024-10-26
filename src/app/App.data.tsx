@@ -15,7 +15,7 @@ const MedicineCategory = lazy(
   () => import("@/pages/medicineCategory/MedicineCategoryContext")
 )
 const Employees = lazy(() => import("@/pages/employee/Employees"))
-const LocationRack = lazy(() => import("@/pages/location-rack/LocationRack"))
+const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/Customers"))
 
