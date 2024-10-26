@@ -1,6 +1,7 @@
 import { Subject } from "@/hooks/useAbility"
 import {
   DashboardOutlined,
+  HddOutlined,
   InboxOutlined,
   MedicineBoxOutlined, ShoppingCartOutlined, UsergroupAddOutlined,
   UserOutlined,
@@ -14,6 +15,7 @@ const MedicineCategory = lazy(
   () => import("@/pages/medicineCategory/MedicineCategoryContext")
 )
 const Employees = lazy(() => import("@/pages/employee/Employees"))
+const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/Customers"))
 
@@ -82,5 +84,13 @@ export const RouterData: TRouteData[] = [
     subject: "customer",
     icon: <UsergroupAddOutlined />,
     element: <Customer />,
+  },
+  {
+    key: "/locationRack",
+    path: "/locationRack",
+    label: "Location Rack",
+    subject: "locationRack",
+    icon: <HddOutlined />,
+    element: <LocationRack />,
   },
 ]
