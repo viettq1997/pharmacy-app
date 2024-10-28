@@ -1,6 +1,6 @@
 import { Subject } from "@/hooks/useAbility"
 import {
-  DashboardOutlined,
+  DashboardOutlined, FileDoneOutlined,
   HddOutlined,
   InboxOutlined,
   MedicineBoxOutlined,
@@ -22,6 +22,7 @@ const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/Customers"))
 const Setting = lazy(() => import("@/pages/setting/Setting"))
+const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext.tsx"))
 
 type TRouteData = {
   key: string
@@ -66,20 +67,20 @@ export const RouterData: TRouteData[] = [
     element: <MedicineCategory />,
   },
   {
-    key: "/employee",
-    path: "/employee",
-    label: "Employee",
-    subject: "employee",
-    icon: <UserOutlined />,
-    element: <Employees />,
-  },
-  {
     key: "/pharmacy-pos",
     path: "/pharmacy-pos",
     label: "POS",
     subject: "pharmacy-pos",
     icon: <ShoppingCartOutlined />,
     element: <PharmacyPOS />,
+  },
+  {
+    key: "/stock-purchase",
+    path: "/stock-purchase",
+    label: "Purchase",
+    subject: "stockPurchase",
+    icon: <FileDoneOutlined />,
+    element: <Purchase />,
   },
   {
     key: "/customer",
@@ -96,6 +97,14 @@ export const RouterData: TRouteData[] = [
     subject: "locationRack",
     icon: <HddOutlined />,
     element: <LocationRack />,
+  },
+  {
+    key: "/employee",
+    path: "/employee",
+    label: "Employee",
+    subject: "employee",
+    icon: <UserOutlined />,
+    element: <Employees />,
   },
   {
     key: "/setting",

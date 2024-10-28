@@ -34,13 +34,12 @@ const Customers: React.FC = () => {
   const {post, put, get, del} = useApi();
   const fetchCustomers = async (_page: number = currentPage, _size: number = pageSize) => {
     try {
-      const response = await get(`/customers`, {page: _page - 1, size: _size});
-      const { data } = response;
-      setCustomers(data.content);
-      setTotal(data.totalElement);
+      const { content, totalElement } = await get(`/customers`, {page: _page - 1, size: _size});
+      setCustomers(content);
+      setTotal(totalElement);
     } catch (error) {
       console.log(error)
-      message.error('Failed to fetch customers');
+      // message.error('Failed to fetch customers');
     }
   };
 

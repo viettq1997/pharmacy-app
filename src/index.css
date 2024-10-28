@@ -41,3 +41,6 @@ body,
   border-radius: 6px;
   background-color: #ebebeb;
 }
+.bg-none {
+    background: none !important;
+}

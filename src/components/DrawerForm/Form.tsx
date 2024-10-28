@@ -1,6 +1,7 @@
 import { Field } from "@/types/FieldTypes"
 import { Form, FormInstance, Input, InputNumber, Select } from "antd"
 import { FC, memo } from "react"
+import {SearchApi} from "@/components/DrawerForm/SelectApi.tsx";
 
 export type TCustomFormProps = {
   form: FormInstance
@@ -36,6 +37,15 @@ const CustomForm: FC<TCustomFormProps> = ({
       case "select":
         return (
           <Select placeholder={field.placeholder} options={field.options} />
+        )
+      case "select-api":
+        return (
+          <SearchApi placeholder={field.placeholder}
+                      onChange={(newValue) => {
+                        form.setFieldValue(field.name, newValue.value);
+                      }}
+                     value={form.getFieldValue(field.name)}
+                     fetchOptions={field.fetchOptions}/>
         )
       default:
         return (
