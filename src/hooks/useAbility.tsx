@@ -24,6 +24,7 @@ export type Subject =
   | "report"
   | "locationRack"
   | "medicineCategory"
+  | "setting"
 
 type Ability = [CRUDAction, Subject]
 
@@ -55,6 +56,7 @@ const useAbility = () => {
         "locationRack",
         "medicineCategory",
         "pharmacy-pos",
+        "setting",
       ]
     )
   if (role === Role.USER) {

@@ -1,3 +1,4 @@
+import Ability from "@/components/Ability"
 import { Field } from "@/types/FieldTypes"
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { Button, Popconfirm, Space, TableProps } from "antd"
@@ -54,18 +55,22 @@ export const columns = (
       width: 100,
       render: (record: TInfoMedicine) => (
         <Space>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(record)}
-          />
+          <Ability action="update" subject="medicine">
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => onEdit(record)}
+            />
+          </Ability>
           <Popconfirm
             title="Confirm delete"
             okText="Yes"
             cancelText="No"
             onConfirm={() => onDelete(record.id)}
           >
-            <Button danger type="primary" icon={<DeleteOutlined />} />
+            <Ability action="delete" subject="medicine">
+              <Button danger type="primary" icon={<DeleteOutlined />} />
+            </Ability>
           </Popconfirm>
         </Space>
       ),

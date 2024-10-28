@@ -23,6 +23,7 @@ const AppLayout = () => {
     }
     return () => {
       keycloak.onAuthRefreshSuccess = () => {}
+      keycloak.onAuthRefreshError = () => {}
     }
   }, [initialized])
 
