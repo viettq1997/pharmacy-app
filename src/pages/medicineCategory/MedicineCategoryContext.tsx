@@ -79,6 +79,7 @@ const MedicineCategoryProvider = () => {
   }
 
   useEffect(() => {
+    setInfo((prev) => ({ ...prev, loadingSubmit: false }))
     if (dataMutate) {
       notification.success({
         message: "Success",
@@ -89,7 +90,7 @@ const MedicineCategoryProvider = () => {
         setPage(1)
         setFilter({})
       }
-    } else setInfo((prev) => ({ ...prev, loadingSubmit: false }))
+    }
   }, [dataMutate])
 
   useEffect(() => {

@@ -1,14 +1,18 @@
+import ChangePassword from "@/components/ChangePassword"
 import { atomApp } from "@/states/app"
 import { LockOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons"
 import { useKeycloak } from "@react-keycloak/web"
 import { Dropdown, Flex, Layout, Typography } from "antd"
 import { useAtomValue } from "jotai"
+import { useState } from "react"
 import { useCookies } from "react-cookie"
 
 const AppHeader = () => {
   const appState = useAtomValue(atomApp)
   const { keycloak } = useKeycloak()
   const [_cookies, _setCookie, removeCookie] = useCookies(["token"])
+
+  const [openChangePassword, setOpenChangePassword] = useState(false)
 
   const handleLogout = () => {
     removeCookie("token")
@@ -36,6 +40,7 @@ const AppHeader = () => {
                 key: "change-password",
                 label: "Change Password",
                 icon: <LockOutlined />,
+                onClick: () => setOpenChangePassword(true),
               },
               {
                 key: "logout",
@@ -49,6 +54,10 @@ const AppHeader = () => {
           <UserOutlined className="text-[28px] text-white" />
         </Dropdown>
       </Flex>
+      <ChangePassword
+        open={openChangePassword}
+        onClose={() => setOpenChangePassword(false)}
+      />
     </Layout.Header>
   )
 }
