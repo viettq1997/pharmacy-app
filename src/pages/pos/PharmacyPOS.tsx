@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react';
-import {Input, Menu, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin} from 'antd';
-import { ShoppingCartOutlined, PlusOutlined, MinusOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal} from 'antd';
+import {
+  ShoppingCartOutlined,
+  PlusOutlined,
+  MinusOutlined,
+  DeleteOutlined,
+  UserOutlined,
+   WarningTwoTone
+} from '@ant-design/icons';
 import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
 import useApi from "@/hooks/useApi.tsx";
 import {generateBill} from "@/utils/function.ts";
+import "./PharmacyPOS.css"
+import BaseForm from "@/components/BaseForm.tsx";
+import {customerFields} from "@/pages/customer/Customers.tsx";
+import {CustomerType} from "@/types/CustomerTypes.ts";
+import moment from "moment";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -57,19 +69,22 @@ interface Customer {
 }
 
 export default function PharmacyPOS() {
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, _setSelectedCategory] = useState('all');
   const [filteredProducts, setFilteredProducts] = useState<InventoryMed[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingMed, setLoadingMed] = useState<boolean>(false);
+  const [_categories, setCategories] = useState<Category[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customerOptions, setCustomerOptions] = useState<any[]>([]);
+  const [searchCustomer, setSearchCustomer] = useState<string>('');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const pageSize = 18
   const [total, setTotal] = useState(0);
-  const { get, post, put, del } = useApi()
+  const { get, post} = useApi()
   const getCategories = async () => {
     const params: any = {
       page: 0,
@@ -79,12 +94,34 @@ export default function PharmacyPOS() {
     setCategories([{id: 'all', name: 'All'}, ...resp.content])
   }
 
+  const handleFinishCustomer = async (values: CustomerType) => {
+    setLoading(true)
+    try {
+      const customer = (await post('/customers', {
+        ...values,
+      }));
+      console.log(customer)
+      setSelectedCustomer({
+        ...customer,
+        value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
+        label: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
+      })
+      message.success('Customer created successfully');
+      setIsModalVisible(false);
+    } catch (error) {
+      console.log(error)
+      message.error('Failed to save customer');
+    }
+    setLoading(false)
+  };
+
   const getMeds = async () => {
     // const filtered = products.filter(product =>
     //   (selectedCategory === 'All' || product.category === selectedCategory) &&
     //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
     // );
     // setFilteredProducts(filtered);
+    setLoadingMed(true)
     const params: any = {
       page: currentPage - 1,
       size: pageSize,
@@ -94,6 +131,7 @@ export default function PharmacyPOS() {
     const { content, totalElement } =  await get('reports/inventory', params)
     setFilteredProducts(content);
     setTotal(totalElement)
+    setLoadingMed(false)
   }
 
   useEffect(() => {
@@ -101,7 +139,7 @@ export default function PharmacyPOS() {
   }, [])
   useEffect(() => {
     getMeds()
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, currentPage]);
 
   const addToCart = (product: InventoryMed) => {
     setCart(prevCart => {
@@ -150,7 +188,7 @@ export default function PharmacyPOS() {
       }))
     }
     setLoading(true)
-    const order = (await post('/sales', dataBody))?.content
+    const order = (await post('/sales', dataBody))
     if(order) {
       if (selectedCustomer) {
         message.success(`Order placed successfully for ${selectedCustomer.label}!`);
@@ -165,9 +203,9 @@ export default function PharmacyPOS() {
       }))
       const printContent = generateBill({
         listItems,
-        orderCode: order?.id,
+        orderCode: order?.code,
         amount: order.totalAmount,
-        orderPayTime: order?.createdAt,
+        orderPayTime: moment(new Date(order?.createdDate)).format('DD-MM-YYYY HH:mm'),
         totalAmount: listItems.reduce((a, v) => v.amount + a, 0),
       })
       const windowPrint = window.open('');
@@ -185,6 +223,7 @@ export default function PharmacyPOS() {
   };
 
   const handleCustomerSearch = async (value: string) => {
+    setSearchCustomer(value)
     const params: any = {
       page: 0,
       size: 100,
@@ -217,37 +256,53 @@ export default function PharmacyPOS() {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{width: 300, marginRight: 16}} size="large"
           />
-          <Menu
-            mode="horizontal" className="bg-none"
-            selectedKeys={[selectedCategory]}
-            onSelect={({key}) => setSelectedCategory(key as string)}
-            style={{flex: 1}}
-          >
-            {categories.map(category => (
-              <Menu.Item key={category.id}>{category.name}</Menu.Item>
-            ))}
-          </Menu>
+          {/*<Menu*/}
+          {/*  mode="horizontal" className="bg-none"*/}
+          {/*  selectedKeys={[selectedCategory]}*/}
+          {/*  onSelect={({key}) => setSelectedCategory(key as string)}*/}
+          {/*  style={{flex: 1}}*/}
+          {/*>*/}
+          {/*  {categories.map(category => (*/}
+          {/*    <Menu.Item key={category.id}>{category.name}</Menu.Item>*/}
+          {/*  ))}*/}
+          {/*</Menu>*/}
         </div>
         <div style={{padding: '24px'}}>
           <Row gutter={24}>
             <Col span={16}>
               <List
+                pagination={{
+                  onChange: (page) => {
+                    console.log(page);
+                    setCurrentPage(page)
+                  },
+                  pageSize: pageSize,
+                  total: total,
+                  showSizeChanger: false,
+                  align: "center"
+                }}
                 grid={{gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3}}
                 dataSource={filteredProducts}
+                loading={loadingMed}
                 renderItem={(product) => (
-                  <List.Item>
+                  <List.Item className="pos-list-med">
                     <Card
+                      hoverable={true}  className={product.isGettingExpire ? 'border-warning' : ''}
                       title={product.medicine.name}
-                      // extra={product.prescription ? <Tag color="red">Rx</Tag> : <Tag color="green">OTC</Tag>}
+                      extra={product.isGettingExpire ? <Tooltip title='Warning: Medication is about to expire'>
+                        <WarningTwoTone style={{fontSize: '1.5rem'}} twoToneColor="#EB772FFF"/>
+                      </Tooltip> : <></>}
+                      actions={[
+                        <Button color="primary"   variant="text" className="add-to-cart" onClick={() => addToCart(product)}>
+                          <strong>Add to Cart</strong>
+                        </Button>
+                      ]}
                     >
                       <p>${product.medicine.price.toFixed(2)}</p>
                       <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
                         <span>{product.quantity} in-stock</span>
                         <span>exp: {product.expDate}</span>
                       </p>
-                      <Button type="primary" onClick={() => addToCart(product)}>
-                        Add to Cart
-                      </Button>
                     </Card>
                   </List.Item>
                 )}
@@ -255,15 +310,22 @@ export default function PharmacyPOS() {
             </Col>
             <Col span={8}>
               <Card title={<Title level={4}>Shopping Cart <ShoppingCartOutlined/></Title>}>
-                <AutoComplete
-                  style={{width: '100%', marginBottom: 16}}
-                  options={customerOptions}
-                  onSearch={handleCustomerSearch}
-                  onSelect={handleCustomerSelect}
-                  placeholder="Search customer by phone or name"
-                >
-                  <Input prefix={<UserOutlined/>}/>
-                </AutoComplete>
+                { !selectedCustomer &&
+                  <AutoComplete
+                    style={{width: '100%', marginBottom: 16}}
+                    options={customerOptions}
+                    onSearch={handleCustomerSearch}
+                    onSelect={handleCustomerSelect}
+                    placeholder="Search customer by phone or name"
+                  >
+                    <Input prefix={<UserOutlined/>}
+                           suffix={<Tooltip title='Create new customer'><PlusOutlined onClick={() => setIsModalVisible(true)}/></Tooltip>}/>
+                  </AutoComplete>
+                }
+                {!!selectedCustomer && <div className='customer-info'>
+                  <div><UserOutlined/> {selectedCustomer?.label}</div>
+                    <div><Tooltip title="unuse customer"><DeleteOutlined onClick={() => setSelectedCustomer(null)} /></Tooltip></div>
+                </div>}
                 <List
                   dataSource={cart}
                   renderItem={(item) => (
@@ -335,6 +397,18 @@ export default function PharmacyPOS() {
           </Row>
         </div>
       </div>
+      <Modal
+        title={'Create Customer'}
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <BaseForm isSubmitting={loading}
+                  fields={customerFields}
+                  onFinish={handleFinishCustomer}
+                  initialValues={{phoneNo: searchCustomer}}
+        />
+      </Modal>
     </Spin>
   );
 }

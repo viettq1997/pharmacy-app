@@ -1,12 +1,9 @@
-import Ability from "@/components/Ability"
 import { Field } from "@/types/FieldTypes"
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
-import { Button, Popconfirm, Space, TableProps } from "antd"
-import {PurchaseInterface} from "@/pages/purchase/Purchase.type.ts";
+import { TableProps } from "antd"
 
 export const columns = (
-  onEdit: (record: any) => void,
-  onDelete: (id: string) => void
+  _onEdit: (record: any) => void,
+  _onDelete: (id: string) => void
 ) =>
   [
     {
@@ -42,32 +39,32 @@ export const columns = (
       dataIndex: "updatedDate",
       width: 150,
     },
-    {
-      key: "action",
-      align: "center",
-      width: 100,
-      render: (record: PurchaseInterface) => (
-        <Space>
-          <Ability action="update" subject="stockPurchase">
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={() => onEdit(record)}
-            />
-          </Ability>
-          <Popconfirm
-            title="Confirm delete"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => onDelete(record.id as string)}
-          >
-            <Ability action="delete" subject="stockPurchase">
-              <Button danger type="primary" icon={<DeleteOutlined />} />
-            </Ability>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+    // {
+    //   key: "action",
+    //   align: "center",
+    //   width: 100,
+    //   render: (record: PurchaseInterface) => (
+    //     <Space>
+    //       <Ability action="update" subject="stockPurchase">
+    //         <Button hidden
+    //           type="primary"
+    //           icon={<EditOutlined />}
+    //           onClick={() => onEdit(record)}
+    //         />
+    //       </Ability>
+    //       <Popconfirm
+    //         title="Confirm delete"
+    //         okText="Yes"
+    //         cancelText="No"
+    //         onConfirm={() => onDelete(record.id as string)}
+    //       >
+    //         <Ability action="delete" subject="stockPurchase">
+    //           <Button hidden danger type="primary" icon={<DeleteOutlined />} />
+    //         </Ability>
+    //       </Popconfirm>
+    //     </Space>
+    //   ),
+    // },
   ] satisfies TableProps["columns"]
 
 export const fields: (
