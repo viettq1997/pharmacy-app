@@ -75,7 +75,12 @@ const Purchase = () => {
   ) => {
     setOpen(isOpen)
     setTypeForm(typeForm)
-    setInitialValues(initialValues)
+    setInitialValues(initialValues ? {
+      ...initialValues,
+      medicineId: initialValues?.medicine?.id || '',
+      supplierId: initialValues?.supplier?.id || '',
+      locationRack: initialValues?.locationRack?.id || ''
+    } : initialValues)
   }
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import {CustomerType} from "@/types/CustomerTypes.ts";
 
 const { Search } = Input;
 
-const customerFields: Field[] = [
+export const customerFields: Field[] = [
   { name: 'phoneNo', label: 'Phone Number', type: 'text', rules:  [{ required: true }] },
   { name: 'firstName', label: 'First Name', type: 'text', rules: [{ required: false }] },
   { name: 'lastName', label: 'Last Name', type: 'text', rules: [{ required: false }] },

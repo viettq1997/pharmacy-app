@@ -3,8 +3,11 @@ import {InfoBaseContextInterface, ResponseListBaseInterface} from "@/types/Commo
 export interface PurchaseInterface {
   id?: string,
   medicineId: string,
+  medicine?: any,
   supplierId: string,
+  supplier?: any,
   locationRackId: string,
+  locationRack?: any,
   quantity: number,
   cost: number,
   mfgDate: string,
