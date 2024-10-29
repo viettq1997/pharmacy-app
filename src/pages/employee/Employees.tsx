@@ -39,13 +39,12 @@ const Employees: React.FC = () => {
   const {post, put, get, del} = useApi();
   const fetchEmployees = async (_page: number = currentPage, _size: number = pageSize) => {
     try {
-      const response = await get(`/employees`, {page: _page - 1, size: _size});
-      const { data } = response;
-      setEmployees(data.content);
-      setTotal(data.totalElement);
+      const { content, totalElement } = await get(`/employees`, {page: _page - 1, size: _size});
+      setEmployees(content);
+      setTotal(totalElement);
     } catch (error) {
       console.log(error)
-      message.error('Failed to fetch employees');
+      // message.error('Failed to fetch employees');
     }
   };
 

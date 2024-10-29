@@ -50,28 +50,28 @@ const useApi = () => {
   const post = async (url: string, body: Record<string, any>) => {
     try {
       const res = await api.post(url, body, { headers })
-      if (res.data) return true
-      return false
+      if (res.data) return res.data.data
+      return null
     } catch (e: any) {
       if (e.status === 401) throwUnauthenticated(e)
       notification.error({
         message: e.response?.data.message || "Something went wrong",
       })
-      return false
+      return null
     }
   }
 
   const put = async (url: string, id: string, body: Record<string, any>) => {
     try {
       const res = await api.put(`${url}/${id}`, body, { headers })
-      if (res.data) return true
-      return false
+      if (res.data) return res.data.data
+      return null
     } catch (e: any) {
       if (e.status === 401) throwUnauthenticated(e)
       notification.error({
         message: e.response?.data.message || "Something went wrong",
       })
-      return false
+      return null
     }
   }
 

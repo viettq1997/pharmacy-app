@@ -1,65 +1,109 @@
 import { useState, useEffect } from 'react';
-import { Layout, Input, Menu, List, Card, Button, message, Typography, Row, Col, Tag, AutoComplete } from 'antd';
+import {Input, Menu, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin} from 'antd';
 import { ShoppingCartOutlined, PlusOutlined, MinusOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
+import useApi from "@/hooks/useApi.tsx";
+import {generateBill} from "@/utils/function.ts";
 
-const { Header, Content } = Layout;
 const { Title } = Typography;
 const { Search } = Input;
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-  prescription: boolean;
+interface InventoryMed {
+  "id": string,
+  "quantity": number,
+  "expDate": string,
+  "mfgDate": string,
+  "isGettingExpire": string,
+  locationRack: {
+    id: string
+    position: string
+  },
+  medicine: {
+    "id": string,
+    "name": string,
+    "price": number,
+    "categoryId": string,
+    "createdDate": string,
+    "createdBy": string,
+    "updatedDate": string,
+    "updatedBy": string,
+  }
 }
 
-interface CartItem extends Product {
+interface Category {
+  "id": string,
+  "name": string,
+  "description"?: string
+  "createdDate"?: string
+  "createdBy"?: string
+  "updatedDate"?: string
+  "updatedBy"?: string
+}
+
+interface CartItem extends InventoryMed {
   quantity: number;
 }
 
 interface Customer {
-  id: number;
-  name: string;
-  phone: string;
+  id: string,
+  firstName: string,
+  lastName: string,
+  age: number,
+  sex: string,
+  phoneNo: string,
+  mail: string,
+  value:string,
+  label: string
 }
 
-const products: Product[] = [
-  { id: 1, name: "Aspirin", price: 5.99, category: "Pain Relief", prescription: false },
-  { id: 2, name: "Amoxicillin", price: 12.99, category: "Antibiotics", prescription: true },
-  { id: 3, name: "Loratadine", price: 8.99, category: "Allergy", prescription: false },
-  { id: 4, name: "Ibuprofen", price: 6.99, category: "Pain Relief", prescription: false },
-  { id: 5, name: "Omeprazole", price: 15.99, category: "Digestive Health", prescription: true },
-  { id: 6, name: "Vitamin C", price: 9.99, category: "Vitamins", prescription: false },
-  { id: 7, name: "Metformin", price: 14.99, category: "Diabetes", prescription: true },
-  { id: 8, name: "Cetirizine", price: 7.99, category: "Allergy", prescription: false },
-];
-
-const categories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
-
-// Mock customer data
-const customers: Customer[] = [
-  { id: 1, name: "John Doe", phone: "1234567890" },
-  { id: 2, name: "Jane Smith", phone: "9876543210" },
-];
-
 export default function PharmacyPOS() {
+  const [loading, setLoading] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filteredProducts, setFilteredProducts] = useState<InventoryMed[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [customerOptions, setCustomerOptions] = useState<{ value: string; label: string }[]>([]);
+  const [customerOptions, setCustomerOptions] = useState<any[]>([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const { get, post, put, del } = useApi()
+  const getCategories = async () => {
+    const params: any = {
+      page: 0,
+      size: 200,
+    }
+    const resp = await get(GET_MEDICINE_CATEGORIES_PAGINATION, params)
+    setCategories([{id: 'all', name: 'All'}, ...resp.content])
+  }
+
+  const getMeds = async () => {
+    // const filtered = products.filter(product =>
+    //   (selectedCategory === 'All' || product.category === selectedCategory) &&
+    //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+    // setFilteredProducts(filtered);
+    const params: any = {
+      page: currentPage - 1,
+      size: pageSize,
+      keyword: searchTerm || undefined,
+      categoryId: selectedCategory === 'all' ? undefined : selectedCategory
+    }
+    const { content, totalElement } =  await get('reports/inventory', params)
+    setFilteredProducts(content);
+    setTotal(totalElement)
+  }
 
   useEffect(() => {
-    const filtered = products.filter(product =>
-      (selectedCategory === 'All' || product.category === selectedCategory) &&
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredProducts(filtered);
+    getCategories()
+  }, [])
+  useEffect(() => {
+    getMeds()
   }, [searchTerm, selectedCategory]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: InventoryMed) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
@@ -72,7 +116,7 @@ export default function PharmacyPOS() {
     });
   };
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  const updateQuantity = (id: string, newQuantity: number) => {
     setCart(prevCart => {
       return prevCart.reduce((acc, item) => {
         if (item.id === id) {
@@ -87,169 +131,210 @@ export default function PharmacyPOS() {
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCart(prevCart => prevCart.filter(item => item.id !== id));
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.reduce((total, item) => total + item.medicine.price * item.quantity, 0);
   };
 
-  const handleCheckout = () => {
-    if (selectedCustomer) {
-      message.success(`Order placed successfully for ${selectedCustomer.name}!`);
-    } else {
-      message.success('Order placed successfully!');
+  const handleCheckout = async () => {
+    const dataBody = {
+      customerId: selectedCustomer?.id,
+      usePoint: false,
+      saleItems: cart.map(c => ({
+        inventoryId: c.id,
+        quantity: c.quantity,
+        price: c.quantity * c.medicine.price
+      }))
     }
-    setCart([]);
-    setSelectedCustomer(null);
+    setLoading(true)
+    const order = (await post('/sales', dataBody))?.content
+    if(order) {
+      if (selectedCustomer) {
+        message.success(`Order placed successfully for ${selectedCustomer.label}!`);
+      } else {
+        message.success('Order placed successfully!');
+      }
+      const listItems = cart.map(c => ({
+        quantity: c.quantity,
+        name: c.medicine.name,
+        price: c.medicine.price,
+        amount: c.medicine.price * c.quantity
+      }))
+      const printContent = generateBill({
+        listItems,
+        orderCode: order?.id,
+        amount: order.totalAmount,
+        orderPayTime: order?.createdAt,
+        totalAmount: listItems.reduce((a, v) => v.amount + a, 0),
+      })
+      const windowPrint = window.open('');
+      windowPrint?.document.write(printContent);
+      windowPrint?.document.close();
+      setTimeout(() => {
+        windowPrint?.focus();
+        windowPrint?.print();
+        windowPrint?.close();
+      }, 1000)
+      setCart([]);
+      setSelectedCustomer(null);
+    }
+    setLoading(false)
   };
 
-  const handleCustomerSearch = (value: string) => {
-    const matchedCustomers = customers.filter(
-      customer => customer.phone.includes(value) || customer.name.toLowerCase().includes(value.toLowerCase())
-    );
+  const handleCustomerSearch = async (value: string) => {
+    const params: any = {
+      page: 0,
+      size: 100,
+      phoneNo: value
+    }
+    const {content} = await get('/customers', params)
     setCustomerOptions(
-      matchedCustomers.map(customer => ({
-        value: customer.phone,
-        label: `${customer.name} (${customer.phone})`,
+      content.map((customer: any) => ({
+        ...customer,
+        value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
+        label: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
       }))
     );
   };
 
   const handleCustomerSelect = (value: string) => {
-    const selectedCustomer = customers.find(customer => customer.phone === value);
+    const selectedCustomer = customerOptions.find(customer => customer.value === value);
     if (selectedCustomer) {
       setSelectedCustomer(selectedCustomer);
-      message.success(`Customer ${selectedCustomer.name} added to the order.`);
+      message.success(`Customer ${selectedCustomer.label} added to the order.`);
     }
   };
 
   return (
-    <Layout className="min-h-screen">
-      <Header className="bg-white flex items-center justify-between p-0">
-        <Search
-          placeholder="Search medicines"
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: 300, marginRight: 16 }}
-        />
-        <Menu
-          mode="horizontal"
-          selectedKeys={[selectedCategory]}
-          onSelect={({ key }) => setSelectedCategory(key as string)}
-          style={{ flex: 1 }}
-        >
-          {categories.map(category => (
-            <Menu.Item key={category}>{category}</Menu.Item>
-          ))}
-        </Menu>
-      </Header>
-      <Content style={{ padding: '24px' }}>
-        <Row gutter={24}>
-          <Col span={16}>
-            <List
-              grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3 }}
-              dataSource={filteredProducts}
-              renderItem={(product) => (
-                <List.Item>
-                  <Card
-                    title={product.name}
-                    extra={product.prescription ? <Tag color="red">Rx</Tag> : <Tag color="green">OTC</Tag>}
-                  >
-                    <p>${product.price.toFixed(2)}</p>
-                    <p>{product.category}</p>
-                    <Button type="primary" onClick={() => addToCart(product)}>
-                      Add to Cart
-                    </Button>
-                  </Card>
-                </List.Item>
-              )}
-            />
-          </Col>
-          <Col span={8}>
-            <Card title={<Title level={4}>Shopping Cart <ShoppingCartOutlined /></Title>}>
-              <AutoComplete
-                style={{ width: '100%', marginBottom: 16 }}
-                options={customerOptions}
-                onSearch={handleCustomerSearch}
-                onSelect={handleCustomerSelect}
-                placeholder="Search customer by phone or name"
-              >
-                <Input prefix={<UserOutlined />} />
-              </AutoComplete>
-              {selectedCustomer && (
-                <p className="mb-4">Customer: {selectedCustomer.name} ({selectedCustomer.phone})</p>
-              )}
+    <Spin spinning={loading}>
+      <div className="min-h-screen">
+        <div className="flex items-center justify-between p-0">
+          <Search
+            placeholder="Search medicines"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{width: 300, marginRight: 16}} size="large"
+          />
+          <Menu
+            mode="horizontal" className="bg-none"
+            selectedKeys={[selectedCategory]}
+            onSelect={({key}) => setSelectedCategory(key as string)}
+            style={{flex: 1}}
+          >
+            {categories.map(category => (
+              <Menu.Item key={category.id}>{category.name}</Menu.Item>
+            ))}
+          </Menu>
+        </div>
+        <div style={{padding: '24px'}}>
+          <Row gutter={24}>
+            <Col span={16}>
               <List
-                dataSource={cart}
-                renderItem={(item) => (
+                grid={{gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3}}
+                dataSource={filteredProducts}
+                renderItem={(product) => (
                   <List.Item>
-                    <List.Item.Meta
-                      title={item.name}
-                      description={`$${item.price.toFixed(2)} ${item.prescription ? '(Rx)' : '(OTC)'}`}
-                    />
-                    <div className="flex items-center">
-                      <Button
-                        icon={<MinusOutlined />}
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        size="small"
-                      />
-                      <Input
-                        className="mx-2 w-16 text-center"
-                        value={item.quantity}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          if (!isNaN(value)) {
-                            updateQuantity(item.id, value);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const value = parseInt(e.target.value);
-                          if (isNaN(value) || value < 1) {
-                            updateQuantity(item.id, 1);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            updateQuantity(item.id, item.quantity + 1);
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            updateQuantity(item.id, Math.max(1, item.quantity - 1));
-                          }
-                        }}
-                      />
-                      <Button
-                        icon={<PlusOutlined />}
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        size="small"
-                      />
-                      <Button
-                        icon={<DeleteOutlined />}
-                        onClick={() => removeFromCart(item.id)}
-                        size="small"
-                        className="ml-2"
-                        danger
-                      />
-                    </div>
+                    <Card
+                      title={product.medicine.name}
+                      // extra={product.prescription ? <Tag color="red">Rx</Tag> : <Tag color="green">OTC</Tag>}
+                    >
+                      <p>${product.medicine.price.toFixed(2)}</p>
+                      <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
+                        <span>{product.quantity} in-stock</span>
+                        <span>exp: {product.expDate}</span>
+                      </p>
+                      <Button type="primary" onClick={() => addToCart(product)}>
+                        Add to Cart
+                      </Button>
+                    </Card>
                   </List.Item>
                 )}
               />
-              <div className="mt-4">
-                <Title level={4}>Total: ${getTotalPrice().toFixed(2)}</Title>
-                <Button
-                  type="primary"
-                  size="large"
-                  onClick={handleCheckout}
-                  disabled={cart.length === 0}
+            </Col>
+            <Col span={8}>
+              <Card title={<Title level={4}>Shopping Cart <ShoppingCartOutlined/></Title>}>
+                <AutoComplete
+                  style={{width: '100%', marginBottom: 16}}
+                  options={customerOptions}
+                  onSearch={handleCustomerSearch}
+                  onSelect={handleCustomerSelect}
+                  placeholder="Search customer by phone or name"
                 >
-                  Checkout
-                </Button>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-      </Content>
-    </Layout>
+                  <Input prefix={<UserOutlined/>}/>
+                </AutoComplete>
+                <List
+                  dataSource={cart}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        title={item.medicine.name}
+                        description={`$${item.medicine.price.toFixed(2)}`}
+                      />
+                      <div className="flex items-center">
+                        <Button
+                          icon={<MinusOutlined/>}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          size="small"
+                        />
+                        <Input
+                          className="mx-2 w-16 text-center"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value);
+                            if (!isNaN(value)) {
+                              updateQuantity(item.id, value);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = parseInt(e.target.value);
+                            if (isNaN(value) || value < 1) {
+                              updateQuantity(item.id, 1);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              updateQuantity(item.id, item.quantity + 1);
+                            } else if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              updateQuantity(item.id, Math.max(1, item.quantity - 1));
+                            }
+                          }}
+                        />
+                        <Button
+                          icon={<PlusOutlined/>}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          size="small"
+                        />
+                        <Button
+                          icon={<DeleteOutlined/>}
+                          onClick={() => removeFromCart(item.id)}
+                          size="small"
+                          className="ml-2"
+                          danger
+                        />
+                      </div>
+                    </List.Item>
+                  )}
+                />
+                <div className="mt-4">
+                  <Title level={4}>Total: ${getTotalPrice().toFixed(2)}</Title>
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={handleCheckout}
+                    disabled={cart.length === 0}
+                  >
+                    Checkout
+                  </Button>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+    </Spin>
   );
 }
