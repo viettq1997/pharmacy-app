@@ -60,7 +60,7 @@ const Supplier = () => {
 
     const hanldeMutate = (status: string, values: any) => {
         mutate(values, {
-            onSuccess: ok => {
+            onSuccess: (ok: any) => {
                 if (ok) {
                     if (['deleted', 'created'].includes(status)) {
                         if (
