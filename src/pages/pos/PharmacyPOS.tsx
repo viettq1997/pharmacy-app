@@ -16,31 +16,13 @@ import BaseForm from "@/components/BaseForm.tsx";
 import {customerFields} from "@/pages/customer/Customers.tsx";
 import {CustomerType} from "@/types/CustomerTypes.ts";
 import moment from "moment";
+import {CartItem, InventoryMed} from "@/types/CartTypes.ts";
+import {useAtom} from "jotai/index";
+import {stateCart} from "@/states/cart.ts";
 
 const { Title } = Typography;
 const { Search } = Input;
 
-interface InventoryMed {
-  "id": string,
-  "quantity": number,
-  "expDate": string,
-  "mfgDate": string,
-  "isGettingExpire": string,
-  locationRack: {
-    id: string
-    position: string
-  },
-  medicine: {
-    "id": string,
-    "name": string,
-    "price": number,
-    "categoryId": string,
-    "createdDate": string,
-    "createdBy": string,
-    "updatedDate": string,
-    "updatedBy": string,
-  }
-}
 
 interface Category {
   "id": string,
@@ -50,10 +32,6 @@ interface Category {
   "createdBy"?: string
   "updatedDate"?: string
   "updatedBy"?: string
-}
-
-interface CartItem extends InventoryMed {
-  quantity: number;
 }
 
 interface Customer {
@@ -71,7 +49,8 @@ interface Customer {
 export default function PharmacyPOS() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useAtom(stateCart)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, _setSelectedCategory] = useState('all');
   const [filteredProducts, setFilteredProducts] = useState<InventoryMed[]>([]);
@@ -125,7 +104,7 @@ export default function PharmacyPOS() {
     const params: any = {
       page: currentPage - 1,
       size: pageSize,
-      keyword: searchTerm || undefined,
+      name: searchTerm || undefined,
       categoryId: selectedCategory === 'all' ? undefined : selectedCategory
     }
     const { content, totalElement } =  await get('reports/inventory', params)
@@ -177,6 +156,30 @@ export default function PharmacyPOS() {
     return cart.reduce((total, item) => total + item.medicine.price * item.quantity, 0);
   };
 
+  const printOrder = (order: any) => {
+    const listItems = cart.map(c => ({
+      quantity: c.quantity,
+      name: c.medicine.name,
+      price: c.medicine.price,
+      amount: c.medicine.price * c.quantity
+    }))
+    const printContent = generateBill({
+      listItems,
+      orderCode: order?.code,
+      amount: order.totalAmount,
+      orderPayTime: moment(new Date(order?.createdDate)).format('DD-MM-YYYY HH:mm'),
+      totalAmount: listItems.reduce((a, v) => v.amount + a, 0),
+    })
+    const windowPrint = window.open('');
+    windowPrint?.document.write(printContent);
+    windowPrint?.document.close();
+    setTimeout(() => {
+      windowPrint?.focus();
+      windowPrint?.print();
+      windowPrint?.close();
+    }, 1000)
+  }
+
   const handleCheckout = async () => {
     const dataBody = {
       customerId: selectedCustomer?.id,
@@ -190,32 +193,22 @@ export default function PharmacyPOS() {
     setLoading(true)
     const order = (await post('/sales', dataBody))
     if(order) {
-      if (selectedCustomer) {
-        message.success(`Order placed successfully for ${selectedCustomer.label}!`);
-      } else {
-        message.success('Order placed successfully!');
-      }
-      const listItems = cart.map(c => ({
-        quantity: c.quantity,
-        name: c.medicine.name,
-        price: c.medicine.price,
-        amount: c.medicine.price * c.quantity
-      }))
-      const printContent = generateBill({
-        listItems,
-        orderCode: order?.code,
-        amount: order.totalAmount,
-        orderPayTime: moment(new Date(order?.createdDate)).format('DD-MM-YYYY HH:mm'),
-        totalAmount: listItems.reduce((a, v) => v.amount + a, 0),
+      setSearchTerm('')
+      // if (selectedCustomer) {
+      //   message.success(`Order placed successfully for ${selectedCustomer.label}!`);
+      // } else {
+      //   message.success('Order placed successfully!');
+      // }
+      Modal.success({
+        title: selectedCategory ? `Order placed successfully for ${selectedCustomer?.label}!` : 'Order placed successfully!',
+        footer: (_, { OkBtn }) => (
+            <>
+              <Button onClick={() => printOrder(order)}>Print bill</Button>
+              <OkBtn />
+            </>
+        )
+
       })
-      const windowPrint = window.open('');
-      windowPrint?.document.write(printContent);
-      windowPrint?.document.close();
-      setTimeout(() => {
-        windowPrint?.focus();
-        windowPrint?.print();
-        windowPrint?.close();
-      }, 1000)
       setCart([]);
       setSelectedCustomer(null);
     }
@@ -233,8 +226,8 @@ export default function PharmacyPOS() {
     setCustomerOptions(
       content.map((customer: any) => ({
         ...customer,
-        value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
-        label: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
+        value: `${customer.phoneNo} (${customer.firstName || ''} ${customer.lastName || ''})`,
+        label: `${customer.phoneNo} (${customer.firstName || ''} ${customer.lastName || ''})`,
       }))
     );
   };
@@ -298,7 +291,7 @@ export default function PharmacyPOS() {
                         </Button>
                       ]}
                     >
-                      <p>${product.medicine.price.toFixed(2)}</p>
+                      <p  className={'text-red-500'}>${product.medicine.price.toFixed(2)}</p>
                       <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
                         <span>{product.quantity} in-stock</span>
                         <span>exp: {product.expDate}</span>
@@ -309,13 +302,14 @@ export default function PharmacyPOS() {
               />
             </Col>
             <Col span={8}>
-              <Card title={<Title level={4}>Shopping Cart <ShoppingCartOutlined/></Title>}>
+              <Card title={<Title level={4}>Cart <ShoppingCartOutlined/></Title>}>
                 { !selectedCustomer &&
                   <AutoComplete
                     style={{width: '100%', marginBottom: 16}}
                     options={customerOptions}
                     onSearch={handleCustomerSearch}
                     onSelect={handleCustomerSelect}
+                    className={"autocomplete-customer"}
                     placeholder="Search customer by phone or name"
                   >
                     <Input prefix={<UserOutlined/>}
@@ -382,12 +376,18 @@ export default function PharmacyPOS() {
                   )}
                 />
                 <div className="mt-4">
-                  <Title level={4}>Total: ${getTotalPrice().toFixed(2)}</Title>
+                  <Title level={4}>
+                    <div className="flex justify-between">
+                      <div>Total:</div>
+                      <div className={'text-red-500'}>${getTotalPrice().toFixed(2)}</div>
+                    </div>
+                  </Title>
                   <Button
                     type="primary"
-                    size="large"
+                    size="middle"
                     onClick={handleCheckout}
                     disabled={cart.length === 0}
+                    className={'w-full'}
                   >
                     Checkout
                   </Button>

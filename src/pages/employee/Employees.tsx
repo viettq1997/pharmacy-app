@@ -94,7 +94,10 @@ const Employees: React.FC = () => {
       render: (_: any, record: Employee) => (
         <>
           <Button type="link" className="p-2" onClick={() => setViewingEmployee(record)}><EyeOutlined/></Button>
-          <Button type="link" className="p-2" onClick={() => { setEditingEmployee(record); setIsModalVisible(true); }}><EditOutlined/></Button>
+          <Button type="link" className="p-2" onClick={() => {
+            setEditingEmployee(record);
+            setIsModalVisible(true);
+          }}><EditOutlined/></Button>
           <Popconfirm
             title="Are you sure to delete this employee?"
             onConfirm={() => handleDelete(record.id)}
