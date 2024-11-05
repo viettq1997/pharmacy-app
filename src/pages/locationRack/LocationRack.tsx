@@ -14,6 +14,7 @@ import {
     GET_LOCATION_RACK,
     UPDATE_LOCATION_RACK
 } from '@/api/locationRack.api';
+import { convertISODate } from '@/utils/function';
 
 const defaultInitialValues: any = {
     id: null,
@@ -57,7 +58,7 @@ const LocationRack = () => {
 
     const hanldeMutate = (status: string, values: any) => {
         mutate(values, {
-            onSuccess: ok => {
+            onSuccess: (ok: any) => {
                 if (ok) {
                     if (['deleted', 'created'].includes(status)) {
                         if (
@@ -118,7 +119,8 @@ const LocationRack = () => {
         {
             title: 'Position',
             dataIndex: 'position',
-            key: 'position'
+            key: 'position',
+            width: '25%'
         },
         {
             title: 'Created Date',
@@ -176,7 +178,15 @@ const LocationRack = () => {
 
     if (data) {
         total = data.totalElement;
-        dataSource = data.content;
+        dataSource = data.content.map(record => {
+            if (typeof record.createdDate == 'string')
+                record.createdDate = convertISODate(record.createdDate);
+
+            if (typeof record.updatedDate == 'string')
+                record.updatedDate = convertISODate(record.updatedDate);
+
+            return record;
+        });
     }
 
     const handleOpen = (isOpen: boolean, initialValues = defaultInitialValues) => {

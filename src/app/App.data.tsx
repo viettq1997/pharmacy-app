@@ -1,6 +1,8 @@
 import { Subject } from "@/hooks/useAbility"
 import {
-  DashboardOutlined, FileDoneOutlined,
+  CalendarOutlined,
+  DashboardOutlined,
+  FileDoneOutlined,
   HddOutlined,
   InboxOutlined,
   MedicineBoxOutlined,
@@ -23,6 +25,7 @@ const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/Customers"))
 const Setting = lazy(() => import("@/pages/setting/Setting"))
 const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext.tsx"))
+const Report = lazy(() => import("@/pages/report/Report"))
 
 type TRouteData = {
   key: string
@@ -113,5 +116,12 @@ export const RouterData: TRouteData[] = [
     subject: "setting",
     icon: <SettingOutlined />,
     element: <Setting />,
+  },
+  {
+    key: "/report",
+    path: "/report",
+    label: "Report",
+    icon: <CalendarOutlined />,
+    element: <Report />,
   },
 ]
