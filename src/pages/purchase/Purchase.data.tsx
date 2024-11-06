@@ -1,6 +1,6 @@
 import { Field } from "@/types/FieldTypes"
 import { TableProps } from "antd"
-import {maxDateByField, maxDateByValue, minDateByField, minDateByValue} from "@/utils/validators.ts";
+import {maxDateByField, maxDateByValue, minByValue, minDateByField, minDateByValue} from "@/utils/validators.ts";
 
 export const columns = (
   _onEdit: (record: any) => void,
@@ -102,14 +102,14 @@ export const fields: (
     name: "quantity",
     type: "number",
     placeholder: "Quantity",
-    rules: [{ required: true, message: "Quantity is required" }, {min: 1, message: "Quantity must be at least 1" }],
+    rules: [{ required: true, message: "Quantity is required" }, minByValue('quantity', 'Quantity', 1)],
   },
   {
     label: "Cost",
     name: "cost",
     type: "number",
     placeholder: "Cost",
-    rules: [{ required: true, message: "Cost is required" }, {min: 0, message: "Cost must be at least 0" }],
+    rules: [{ required: true, message: "Cost is required" }, minByValue('cost', 'Cost', 0)],
   },
   {
     label: "MFG date",
