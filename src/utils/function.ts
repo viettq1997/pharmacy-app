@@ -31,3 +31,8 @@ export function generateBill(params: any) {
 
   return updatedTemplate;
 }
+
+export const formatDate = (date: any, format: string = 'YYYY-MM-DD') => {
+  if (dayjs(date).isValid()) return dayjs(date).format(format);
+};
+
