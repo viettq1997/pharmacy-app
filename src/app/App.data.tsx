@@ -24,7 +24,7 @@ const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
 const Customer = lazy(() => import("@/pages/customer/CustomerContext"))
 const Setting = lazy(() => import("@/pages/setting/Setting"))
-const Purchase = lazy(() => import("@/pages/purchase/PurchaseContex"))
+const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext"))
 const Report = lazy(() => import("@/pages/report/Report"))
 
 type TRouteData = {
