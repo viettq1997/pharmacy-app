@@ -19,12 +19,12 @@ const Medicine = lazy(() => import("@/pages/medicine/MedicineContext"))
 const MedicineCategory = lazy(
   () => import("@/pages/medicineCategory/MedicineCategoryContext")
 )
-const Employees = lazy(() => import("@/pages/employee/Employees"))
+const Employees = lazy(() => import("@/pages/employee/EmployeesContext"))
 const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
 const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
-const Customer = lazy(() => import("@/pages/customer/Customers"))
+const Customer = lazy(() => import("@/pages/customer/CustomerContext"))
 const Setting = lazy(() => import("@/pages/setting/Setting"))
-const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext.tsx"))
+const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext"))
 const Report = lazy(() => import("@/pages/report/Report"))
 
 type TRouteData = {

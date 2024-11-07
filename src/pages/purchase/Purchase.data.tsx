@@ -1,5 +1,6 @@
 import { Field } from "@/types/FieldTypes"
 import { TableProps } from "antd"
+import {maxDateByField, maxDateByValue, minByValue, minDateByField, minDateByValue} from "@/utils/validators.ts";
 
 export const columns = (
   _onEdit: (record: any) => void,
@@ -101,27 +102,27 @@ export const fields: (
     name: "quantity",
     type: "number",
     placeholder: "Quantity",
-    rules: [{ required: true, message: "Quantity is required" }],
+    rules: [{ required: true, message: "Quantity is required" }, minByValue('quantity', 'Quantity', 1)],
   },
   {
     label: "Cost",
     name: "cost",
     type: "number",
     placeholder: "Cost",
-    rules: [{ required: true, message: "Cost is required" }],
+    rules: [{ required: true, message: "Cost is required" }, minByValue('cost', 'Cost', 0)],
   },
   {
     label: "MFG date",
     name: "mfgDate",
     type: "date",
     placeholder: "MFG date",
-    rules: [{ required: true, message: "MFG date is required" }],
+    rules: [{ required: true, message: "MFG date is required" }, maxDateByValue('mfgDate', 'EXP date', new Date(), 'MFG date must be less than today!'), maxDateByField('mfgDate', 'MFG date', 'expDate')],
   },
   {
     label: "EXP date",
     name: "expDate",
     type: "date",
     placeholder: "EXP date",
-    rules: [{ required: true, message: "EXP date is required" }],
+    rules: [{ required: true, message: "EXP date is required" }, minDateByValue('expDate', 'EXP date', new Date(), 'EXP date must be greater than today!'), minDateByField('expDate', 'EXP date', 'mfgDate')],
   },
 ]
