@@ -1,27 +1,143 @@
-import { atomCountGlobal } from "@/states/dashboard"
-import { Button, Card, Flex } from "antd"
-import { useAtom } from "jotai"
-import { memo, useState } from "react"
+import { GET_REPORT_PROFIT_PER_DAY, GET_REPORT_SALE_CHART } from '@/api/report.api';
+import useApi from '@/hooks/useApi';
+import { Line } from '@ant-design/charts';
+import { useQuery } from '@tanstack/react-query';
+import { Card, Col, Flex, Row } from 'antd';
+import { memo } from 'react';
+import { TChart, TGetChart } from './Dashboard.type';
+
+const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+];
 
 const Dashboard = () => {
-  const [countLocalState, setCountLocalState] = useState(0)
-  const [countGlobal, setCountGlobal] = useAtom(atomCountGlobal)
+    const { get } = useApi();
+    const { data: getProftiPerDay, status: getProfitPerDayStatus } = useQuery({
+        queryKey: ['getProfitPerday'],
+        queryFn: () => get(GET_REPORT_PROFIT_PER_DAY)
+    });
+    const { data: getSaleChart, status: getSaleChartStatus } = useQuery<TGetChart[]>({
+        queryKey: ['getSaleChart'],
+        queryFn: () => get(GET_REPORT_SALE_CHART)
+    });
 
-  return (
-    <Card>
-      <Flex gap={24}>
-        <Button
-          type="primary"
-          onClick={() => setCountLocalState(countLocalState + 1)}
-        >
-          {countLocalState} count in local state
-        </Button>
-        <Button type="primary" onClick={() => setCountGlobal(countGlobal + 1)}>
-          {countGlobal} count in global state
-        </Button>
-      </Flex>
-    </Card>
-  )
-}
+    const amountData: Array<TChart> = [];
+    const quantityData: Array<TChart> = [];
 
-export default memo(Dashboard)
+    const chartConfiguration = {
+        yField: 'value',
+        xField: 'month',
+        colorField: 'category',
+        style: {
+            lineWidth: 2
+        }
+    };
+
+    if (getSaleChart && getSaleChartStatus == 'success') {
+        months.forEach(month => {
+            getSaleChart.forEach((item: TGetChart) => {
+                const {
+                    amountOfRefund,
+                    amountOfSale,
+                    totalAmount,
+                    quantityOfRefund,
+                    quantityOfSale,
+                    totalQuantity
+                } = item;
+
+                const common = {
+                    month,
+                    value: 0
+                };
+
+                const refundAmount = {
+                    ...common,
+                    category: 'Refund'
+                };
+                const saleAmount = {
+                    ...common,
+                    category: 'Sale'
+                };
+                const total = {
+                    ...common,
+                    category: 'Total'
+                };
+
+                const refundQuantity = {
+                    ...common,
+                    category: 'Refund'
+                };
+                const saleQuantity = {
+                    ...common,
+                    category: 'Sale'
+                };
+                const quantity = {
+                    ...common,
+                    category: 'Total'
+                };
+
+                if (month.toLowerCase() == item.month.toLowerCase()) {
+                    refundAmount.value = amountOfRefund;
+                    saleAmount.value = amountOfSale;
+                    total.value = totalAmount;
+                    refundQuantity.value = quantityOfRefund;
+                    saleQuantity.value = quantityOfSale;
+                    quantity.value = totalQuantity;
+                }
+
+                amountData.push(refundAmount, saleAmount, total);
+                quantityData.push(refundQuantity, saleQuantity, quantity);
+            });
+        });
+    }
+
+    let profitPerDay = 0;
+    if (getProftiPerDay && getProfitPerDayStatus == 'success') {
+        profitPerDay = getProftiPerDay.amount;
+    }
+
+    return (
+        <Flex vertical className="h-full" gap={16}>
+            <Row>
+                <Col span={6}>
+                    <Card title="Profit Per Day" loading={getProfitPerDayStatus == 'pending'}>
+                        ${profitPerDay}
+                    </Card>
+                </Col>
+            </Row>
+            <Row className="flex-1" gutter={[16, 16]}>
+                <Col xl={12} span={24} className="h-full">
+                    <Card
+                        title="Amount"
+                        className="h-full"
+                        loading={getSaleChartStatus == 'pending'}
+                    >
+                        <Line autoFit data={amountData} {...chartConfiguration} />
+                    </Card>
+                </Col>
+                <Col xl={12} span={24} className="h-full">
+                    <Card
+                        title="Quantity"
+                        className="h-full"
+                        loading={getSaleChartStatus == 'pending'}
+                    >
+                        <Line autoFit data={quantityData} {...chartConfiguration} />
+                    </Card>
+                </Col>
+            </Row>
+        </Flex>
+    );
+};
+
+export default memo(Dashboard);
