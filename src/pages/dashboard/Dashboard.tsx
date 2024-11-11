@@ -1,6 +1,6 @@
 import { GET_REPORT_PROFIT_PER_DAY, GET_REPORT_SALE_CHART } from '@/api/report.api';
 import useApi from '@/hooks/useApi';
-import { Line } from '@ant-design/charts';
+import { Column, Line } from '@ant-design/charts';
 import { useQuery } from '@tanstack/react-query';
 import { Card, Col, Flex, Row } from 'antd';
 import { memo } from 'react';
@@ -38,10 +38,19 @@ const Dashboard = () => {
     const chartConfiguration = {
         yField: 'value',
         xField: 'month',
-        colorField: 'category',
         style: {
             lineWidth: 2
-        }
+        },
+        colorField: 'category'
+    };
+
+    const lineConfiguration = {
+        ...chartConfiguration
+    };
+
+    const columnConfiguration = {
+        ...chartConfiguration,
+        seriesField: 'category',
     };
 
     if (getSaleChart && getSaleChartStatus == 'success') {
@@ -88,7 +97,7 @@ const Dashboard = () => {
                 };
 
                 if (month.toLowerCase() == item.month.toLowerCase()) {
-                    refundAmount.value = amountOfRefund;
+                    refundAmount.value = amountOfRefund * -1;
                     saleAmount.value = amountOfSale;
                     total.value = totalAmount;
                     refundQuantity.value = quantityOfRefund;
@@ -123,7 +132,7 @@ const Dashboard = () => {
                         className="h-full"
                         loading={getSaleChartStatus == 'pending'}
                     >
-                        <Line autoFit data={amountData} {...chartConfiguration} />
+                        <Line autoFit data={amountData} {...lineConfiguration} />
                     </Card>
                 </Col>
                 <Col xl={12} span={24} className="h-full">
@@ -132,7 +141,7 @@ const Dashboard = () => {
                         className="h-full"
                         loading={getSaleChartStatus == 'pending'}
                     >
-                        <Line autoFit data={quantityData} {...chartConfiguration} />
+                        <Column autoFit data={quantityData} {...columnConfiguration} />
                     </Card>
                 </Col>
             </Row>
