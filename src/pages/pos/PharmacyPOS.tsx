@@ -13,12 +13,12 @@ import useApi from "@/hooks/useApi.tsx";
 import {generateBill} from "@/utils/function.ts";
 import "./PharmacyPOS.css"
 import BaseForm from "@/components/BaseForm.tsx";
-import {customerFields} from "@/pages/customer/Customers.tsx";
-import {CustomerType} from "@/types/CustomerTypes.ts";
+import {fields as customerFields} from "@/pages/customer/Customer.data";
 import moment from "moment";
 import {CartItem, InventoryMed} from "@/types/CartTypes.ts";
 import {useAtom} from "jotai/index";
 import {stateCart} from "@/states/cart.ts";
+import {CustomerInterface} from '@/pages/customer/Customer.type.ts';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -73,7 +73,7 @@ export default function PharmacyPOS() {
     setCategories([{id: 'all', name: 'All'}, ...resp.content])
   }
 
-  const handleFinishCustomer = async (values: CustomerType) => {
+  const handleFinishCustomer = async (values: CustomerInterface) => {
     setLoading(true)
     try {
       const customer = (await post('/customers', {
@@ -404,7 +404,7 @@ export default function PharmacyPOS() {
         footer={null}
       >
         <BaseForm isSubmitting={loading}
-                  fields={customerFields}
+                  fields={customerFields()}
                   onFinish={handleFinishCustomer}
                   initialValues={{phoneNo: searchCustomer}}
         />
