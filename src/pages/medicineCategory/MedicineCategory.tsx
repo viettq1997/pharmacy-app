@@ -39,6 +39,7 @@ const MedicineCategory = () => {
 
   return (
     <ContentWrapper
+      subjectCreate="medicineCategory"
       onAdd={() => handleOpen(true, "add")}
       onSearch={(keyword) => onSearch("name", keyword)}
     >

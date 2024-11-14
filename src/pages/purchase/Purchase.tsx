@@ -89,6 +89,7 @@ const Purchase = () => {
 
   return (
     <ContentWrapper
+      subjectCreate="stockPurchase"
       onAdd={() => handleOpen(true, "add")}
       onSearch={(keyword) => onSearch("name", keyword)}
     >
