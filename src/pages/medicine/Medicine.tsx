@@ -11,6 +11,7 @@ const Medicine = () => {
   const {
     data,
     dataCategory,
+    dataUnit,
     loading,
     loadingSubmit,
     total,
@@ -53,7 +54,7 @@ const Medicine = () => {
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }
             onChange={(value) => onSearch("categoryId", value)}
-            className="w-[150px]"
+            className="w-[200px]"
           />
         </>
       }
@@ -75,7 +76,7 @@ const Medicine = () => {
         width={500}
         title={typeForm === "add" ? "Create Medicine" : "Edit Medicine"}
         open={open}
-        fields={fields(dataCategory)}
+        fields={fields(dataCategory, dataUnit)}
         loading={loadingSubmit}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}

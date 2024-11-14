@@ -21,9 +21,16 @@ export const columns = (
       render: (price: number) => (price ? `$${price}` : ""),
     },
     {
+      key: "unit",
+      title: "Unit",
+      dataIndex: "unit",
+      render: (unit: TInfoMedicine["unit"]) => unit?.unit,
+    },
+    {
       key: "category",
       title: "Category",
       dataIndex: "category",
+      render: (category: TInfoMedicine["category"]) => category?.name,
     },
     {
       key: "createdDate",
@@ -77,8 +84,9 @@ export const columns = (
     },
   ] satisfies TableProps["columns"]
 
-export const fields: (optionsCategory: any[]) => Field[] = (
-  optionsCategory
+export const fields: (optionCategory: any[], optionUnit: any[]) => Field[] = (
+  optionCategory,
+  optionUnit
 ) => [
   {
     label: "Name",
@@ -96,11 +104,19 @@ export const fields: (optionsCategory: any[]) => Field[] = (
     rules: [{ required: true, message: "Price is required" }],
   },
   {
+    label: "Unit",
+    name: "medicineUnitId",
+    type: "select",
+    placeholder: "Medicine Unit",
+    rules: [{ required: true, message: "Unit is required" }],
+    options: optionUnit,
+  },
+  {
     label: "Category",
     name: "categoryId",
     type: "select",
     placeholder: "Medicine Category",
     rules: [{ required: true, message: "Category is required" }],
-    options: optionsCategory,
+    options: optionCategory,
   },
 ]
