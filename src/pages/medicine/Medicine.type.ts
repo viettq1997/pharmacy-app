@@ -3,7 +3,9 @@ export type TInfoMedicine = {
   name: string
   price: number
   categoryId: string
-  category: string
+  medicineUnitId: string
+  category: { id: string; name: string }
+  unit: { id: string; unit: string }
   locationRack: string
   createdDate: string
   updatedDate: string
@@ -14,6 +16,7 @@ export type TInfoMedicine = {
 export type TInfoContext = {
   data: TInfoMedicine[]
   dataCategory: { label: string; value: string }[]
+  dataUnit: { label: string; value: string }[]
   page: number
   total: number
   loading: boolean
@@ -29,4 +32,9 @@ export type TDataGetMedicine = {
   totalElement: number
   size: number
   number: number
+}
+
+export type TDataGetMedicineUnit = {
+  id: string
+  unit: string
 }

@@ -1,6 +1,7 @@
 import {
   CREATE_MEDICINE,
   DELETE_MEDICINE,
+  GET_MEDICINE_UNITS,
   GET_MEDICINES_PAGINATION,
   UPDATE_MEDICINE,
 } from "@/api/medicine.api"
@@ -13,11 +14,16 @@ import { App } from "antd"
 import { createContext, useEffect, useState } from "react"
 import { TDataGetMedicineCategory } from "../medicineCategory/MedicineCategory.type"
 import Medicine from "./Medicine"
-import { TDataGetMedicine, TInfoContext } from "./Medicine.type"
+import {
+  TDataGetMedicine,
+  TDataGetMedicineUnit,
+  TInfoContext,
+} from "./Medicine.type"
 
 const defaultInfo: TInfoContext = {
   data: [],
   dataCategory: [],
+  dataUnit: [],
   page: 1,
   total: 0,
   loading: true,
@@ -60,6 +66,14 @@ const MedicineProvider = () => {
         return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 })
       },
     })
+  const { data: dataUnit, isPending: isPendingUnit } = useQuery<
+    TDataGetMedicineUnit[]
+  >({
+    queryKey: ["getMedicineUnit"],
+    queryFn: () => {
+      return get(GET_MEDICINE_UNITS)
+    },
+  })
 
   const { data: dataMutate, mutate } = useMutation({
     mutationFn: (values: any) => {
@@ -104,18 +118,18 @@ const MedicineProvider = () => {
   }, [dataMutate])
 
   useEffect(() => {
-    if (isPending || isPendingCategory)
+    if (isPending || isPendingCategory || isPendingUnit)
       setInfo((prev) => ({ ...prev, loading: true }))
-    else if (data && dataCategory) {
+    else if (data && dataCategory && dataUnit) {
       const newData = data.content.map((item) => {
-        const category = dataCategory.content.find(
-          (el) => el.id === item.categoryId
-        )
         if (item.updatedDate)
           item.updatedDate = convertISODate(item.updatedDate)
         return {
           ...item,
-          category: category?.name || "",
+          unit: item.unit,
+          medicineUnitId: item.unit.id,
+          category: item.category,
+          categoryId: item.category.id,
           createdDate: convertISODate(item.createdDate),
         }
       })
@@ -123,15 +137,27 @@ const MedicineProvider = () => {
         label: item.name,
         value: item.id,
       }))
+      const newDataUnit = dataUnit.map((item) => ({
+        label: item.unit,
+        value: item.id,
+      }))
       setInfo((prev) => ({
         ...prev,
         data: newData,
         dataCategory: newDataCategory,
+        dataUnit: newDataUnit,
         total: data.totalElement,
         loading: false,
       }))
     }
-  }, [data, dataCategory, isPending, isPendingCategory])
+  }, [
+    data,
+    dataCategory,
+    dataUnit,
+    isPending,
+    isPendingCategory,
+    isPendingUnit,
+  ])
 
   return (
     <MedicineContext.Provider
