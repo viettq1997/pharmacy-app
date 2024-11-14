@@ -26,6 +26,7 @@ const ChangePassword: FC<TChangePasswordProps> = ({ open, onClose }) => {
 
   return (
     <Modal
+      title="Change Password"
       open={open}
       okText="Save"
       okButtonProps={{ loading: isPending }}

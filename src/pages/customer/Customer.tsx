@@ -39,6 +39,7 @@ const Customer = () => {
 
     return (
         <ContentWrapper
+            subjectCreate="customer"
             onAdd={() => handleOpen(true, "add")}
             onSearch={(keyword) => onSearch("name", keyword)}
         >

@@ -1,10 +1,10 @@
 import ContentWrapper from "@/components/ContentWrapper"
 import DrawerForm from "@/components/DrawerForm"
 import Table from "@/components/Table"
-import {useContext, useEffect, useState} from "react"
-import {EmployeesContext} from "@/pages/employee/EmployeesContext.tsx";
-import {EmployeeInterface} from "@/pages/employee/Employees.type.ts";
-import {columns, fields} from "@/pages/employee/Employees.data.tsx";
+import { columns, fields } from "@/pages/employee/Employees.data.tsx"
+import { EmployeeInterface } from "@/pages/employee/Employees.type.ts"
+import { EmployeesContext } from "@/pages/employee/EmployeesContext.tsx"
+import { useContext, useEffect, useState } from "react"
 
 const Employee = () => {
   const {
@@ -24,9 +24,9 @@ const Employee = () => {
   const [initialValues, setInitialValues] = useState<EmployeeInterface>()
 
   const handleOpen = (
-      isOpen: boolean,
-      typeForm: "add" | "edit",
-      initialValues?: EmployeeInterface
+    isOpen: boolean,
+    typeForm: "add" | "edit",
+    initialValues?: EmployeeInterface
   ) => {
     setOpen(isOpen)
     setTypeForm(typeForm)
@@ -38,35 +38,32 @@ const Employee = () => {
   }, [data])
 
   return (
-      <ContentWrapper
-          onAdd={() => handleOpen(true, "add")}
-          onSearch={(keyword) => onSearch("name", keyword)}
-      >
-        <Table
-            page={page}
-            total={total}
-            loading={loading}
-            dataSource={data}
-            columns={columns(
-                (initialValues) => handleOpen(true, "edit", initialValues),
-                onDelete
-            )}
-            setPage={setPage}
-        />
-        <DrawerForm
-            title={
-              typeForm === "add"
-                  ? "Create Employee"
-                  : "Edit Employee"
-            }
-            open={open}
-            fields={fields()}
-            loading={loadingSubmit}
-            initialValues={initialValues}
-            setOpen={() => handleOpen(false, "add")}
-            onSubmit={(values) => onSubmit(values, initialValues?.id)}
-        />
-      </ContentWrapper>
+    <ContentWrapper
+      subjectCreate="employee"
+      onAdd={() => handleOpen(true, "add")}
+      onSearch={(keyword) => onSearch("name", keyword)}
+    >
+      <Table
+        page={page}
+        total={total}
+        loading={loading}
+        dataSource={data}
+        columns={columns(
+          (initialValues) => handleOpen(true, "edit", initialValues),
+          onDelete
+        )}
+        setPage={setPage}
+      />
+      <DrawerForm
+        title={typeForm === "add" ? "Create Employee" : "Edit Employee"}
+        open={open}
+        fields={fields()}
+        loading={loadingSubmit}
+        initialValues={initialValues}
+        setOpen={() => handleOpen(false, "add")}
+        onSubmit={(values) => onSubmit(values, initialValues?.id)}
+      />
+    </ContentWrapper>
   )
 }
 

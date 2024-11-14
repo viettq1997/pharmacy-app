@@ -110,18 +110,18 @@ export const RouterData: TRouteData[] = [
     element: <Employees />,
   },
   {
+    key: "/report",
+    path: "/report",
+    label: "Report",
+    icon: <CalendarOutlined />,
+    element: <Report />,
+  },
+  {
     key: "/setting",
     path: "/setting",
     label: "Setting",
     subject: "setting",
     icon: <SettingOutlined />,
     element: <Setting />,
-  },
-  {
-    key: "/report",
-    path: "/report",
-    label: "Report",
-    icon: <CalendarOutlined />,
-    element: <Report />,
   },
 ]

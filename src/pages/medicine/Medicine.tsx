@@ -42,6 +42,7 @@ const Medicine = () => {
 
   return (
     <ContentWrapper
+      subjectCreate="medicine"
       filterElement={
         <>
           <Select
