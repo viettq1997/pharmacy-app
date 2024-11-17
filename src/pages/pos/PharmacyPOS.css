@@ -18,3 +18,6 @@
 .autocomplete-customer .ant-select-selection-placeholder {
     left: 1rem !important;
 }
+.ant-tabs-tab-active h4{
+    color: var(--primary-color)!important;
+}

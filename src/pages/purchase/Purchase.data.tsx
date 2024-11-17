@@ -69,33 +69,48 @@ export const columns = (
   ] satisfies TableProps["columns"]
 
 export const fields: (
-  fetchMedicine: (search: string) => Promise<any[]>,
-  fetchSupplier: (search: string) => Promise<any[]>,
-  fetchLocationRack: (search: string) => Promise<any[]>
-) => Field[] = (fetchMedicine, fetchSupplier, fetchLocationRack) => [
+  medicine: any[],
+  supplier: any[],
+  locationRack: any[],
+  setOpenAddMed: (open: boolean) => void,
+  setOpenAddSupplier: (open: boolean) => void,
+  setOpenAddLocationRack: (open: boolean) => void,
+) => Field[] = (
+    medicine, supplier, locationRack,
+    setOpenAddMed, setOpenAddSupplier, setOpenAddLocationRack
+) => [
   {
     label: "medicine",
     name: "medicineId",
     type: "select-api",
     placeholder: "Medicine",
-    fetchOptions: fetchMedicine,
+    options: medicine,
+    selectorState: "meds",
     rules: [{ required: true, message: "Medicine is required" }],
+    onAdd: () => setOpenAddMed(true),
+    showButtonAdd: true
   },
   {
     label: "Supplier",
     name: "supplierId",
     type: "select-api",
     placeholder: "Supplier",
-    fetchOptions: fetchSupplier,
+    options: supplier,
     rules: [{ required: true, message: "Supplier is required" }],
+    selectorState: "suppliers",
+    onAdd: () => setOpenAddSupplier(true),
+    showButtonAdd: true
   },
   {
     label: "Location Rack",
     name: "locationRackId",
     type: "select-api",
     placeholder: "Location Rack",
-    fetchOptions: fetchLocationRack,
+    options: locationRack,
     rules: [{ required: true, message: "Location rack is required" }],
+    selectorState: "locationRacks",
+    onAdd: () => setOpenAddLocationRack(true),
+    showButtonAdd: true
   },
   {
     label: "Quantity",

@@ -4,6 +4,7 @@ import {FormInstance} from "rc-field-form/lib/interface";
 export const maxDateByValue = (field: string, label: string, valueCompare: Date, message?: string) =>
     ({getFieldValue}: FormInstance) => ({
         validator(_: any, value: any) {
+            console.log(value, moment(valueCompare).format('YYYY-MM-DD'), getFieldValue(field), "|")
             if (!value || getFieldValue(field) <= moment(valueCompare).format('YYYY-MM-DD')) {
                 return Promise.resolve();
             }

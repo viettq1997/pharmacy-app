@@ -6,9 +6,19 @@ import {PurchaseContext} from "./PurchaseContext.tsx"
 import {PurchaseInterface} from "@/pages/purchase/Purchase.type.ts";
 import {columns, fields} from "@/pages/purchase/Purchase.data.tsx";
 import useApi from "@/hooks/useApi.tsx";
-import {GET_MEDICINES_PAGINATION} from "@/api/medicine.api.ts";
-import {GET_SUPPLIER} from "@/api/supplier.api.ts";
-import {GET_LOCATION_RACK} from "@/api/locationRack.api.ts";
+import {CREATE_MEDICINE, GET_MEDICINE_UNITS, GET_MEDICINES_PAGINATION} from "@/api/medicine.api.ts";
+import {CREATE_SUPPLIER, GET_SUPPLIER} from "@/api/supplier.api.ts";
+import {CREATE_LOCATION_RACK, GET_LOCATION_RACK} from "@/api/locationRack.api.ts";
+import { fields as fieldsMed } from "../medicine/Medicine.data"
+import { fields as fieldsSuplier } from "../supplier/Supplier.data.tsx"
+import { fields as fieldsLocationRack } from "../locationRack/LocationRack.data.tsx"
+import ModalAdd from "@/components/ModalAdd";
+import {useQuery} from "@tanstack/react-query";
+import {TDataGetMedicineCategory} from "@/pages/medicineCategory/MedicineCategory.type.ts";
+import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
+import {TDataGetMedicineUnit} from "@/pages/medicine/Medicine.type.ts";
+import {useAtom} from "jotai/index";
+import {atomSelector} from "@/states/selector.ts";
 
 const Purchase = () => {
   const {
@@ -23,56 +33,131 @@ const Purchase = () => {
     onSearch,
   } = useContext(PurchaseContext)
 
+  const [_selectorState, setSelectorState] = useAtom(atomSelector)
+  const { data: dataCategory } = useQuery<TDataGetMedicineCategory[]>({
+        queryKey: ["getMedicineCategories"],
+        queryFn: () => {
+          return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 }).then(
+              resp => {
+                return resp.content.map((item: any) => ({
+                  label: item.name,
+                  value: item.id,
+                }))
+              }
+          )
+        },
+      })
+  const { data: dataUnit } = useQuery<
+      TDataGetMedicineUnit[]
+  >({
+    queryKey: ["getMedicineUnit"],
+    queryFn: () => {
+      return get(GET_MEDICINE_UNITS).then(resp => resp?.map((item: any) => ({
+        label: item.unit,
+        value: item.id,
+      })))
+    },
+  })
+
+  const [units, setUnits] = useState<any>([])
+  const [categories, setCategories] = useState<any>([])
+  const [meds, setMeds] = useState<any>([])
+  const [openAddMed, setOpenAddMed] = useState(false)
+  const [submittingAddMed, setSubmittingAddMed] = useState(false)
+  const [suppliers, setSuppliers] = useState<any>([])
+  const [openAddSupplier, setOpenAddSupplier] = useState(false)
+  const [submittingAddSupplier, setSubmittingAddSupplier] = useState(false)
+  const [locationRacks, setLocationRacks] = useState<any>([])
+  const [openAddRack, setOpenAddRack] = useState(false)
+  const [submittingAddRack, setSubmittingAddRack] = useState(false)
   const [open, setOpen] = useState(false)
   const [typeForm, setTypeForm] = useState<"add" | "edit">("add")
   const [initialValues, setInitialValues] = useState<PurchaseInterface>()
-  const {get} = useApi()
+  const {get, post} = useApi()
 
-  async function getMedList(keyword: string): Promise<any[]> {
+  async function getMedList(keyword: string = '') {
     const params: any = {
       page: 0,
       size: 50,
       keyword: keyword || undefined,
     }
     const {content: listMeds} = await get(GET_MEDICINES_PAGINATION, params)
-    return listMeds.map((x: any) => ({
+    const _meds = listMeds.map((x: any) => ({
       ...x,
       label: x.name,
       value: x.id,
     }))
+    setMeds(_meds)
+    setSelectorState((prev: any) => {
+      return {
+        ...prev,
+        meds: _meds,
+      }
+    })
   }
-  async function getSuplierList(keyword: string): Promise<any[]> {
+  async function getSuplierList(keyword: string = '') {
     const params: any = {
       page: 0,
       size: 50,
       keyword: keyword || undefined,
     }
-    const {content: listMeds} = await get(GET_SUPPLIER, params)
-    return listMeds.map((x: any) => ({
+    const {content: listSup} = await get(GET_SUPPLIER, params)
+    const _sups = listSup.map((x: any) => ({
       ...x,
       label: x.name,
       value: x.id,
     }))
+    setSuppliers(_sups)
+    setSelectorState((prev: any) => {
+      return {
+        ...prev,
+        suppliers: _sups,
+      }
+    })
   }
-  async function getLocationRack(keyword: string): Promise<any[]> {
+  async function getLocationRack(keyword: string = '') {
     const params: any = {
       page: 0,
       size: 50,
       keyword: keyword || undefined,
     }
-    const {content: listMeds} = await get(GET_LOCATION_RACK, params)
-    return listMeds.map((x: any) => ({
+    const {content: listRacks} = await get(GET_LOCATION_RACK, params)
+    const locationRacks = listRacks.map((x: any) => ({
       ...x,
       label: x.position,
       value: x.id,
     }))
+    setLocationRacks(locationRacks)
+    setSelectorState((prev: any) => {
+      return {
+        ...prev,
+        locationRacks: locationRacks,
+      }
+    })
   }
 
-  const handleOpen = (
+  useEffect(() => {
+    if (dataCategory) {
+      setCategories(dataCategory)
+    }
+  }, [dataCategory])
+  useEffect(() => {
+    if (dataUnit) {
+      setUnits(dataUnit)
+    }
+  }, [dataUnit])
+
+
+  const handleOpen = async (
     isOpen: boolean,
     typeForm: "add" | "edit",
     initialValues?: PurchaseInterface
   ) => {
+    await Promise.all([
+      getMedList(),
+      getSuplierList(),
+      getLocationRack(),
+    ])
     setOpen(isOpen)
     setTypeForm(typeForm)
     setInitialValues(initialValues ? {
@@ -81,6 +166,30 @@ const Purchase = () => {
       supplierId: initialValues?.supplier?.id || '',
       locationRack: initialValues?.locationRack?.id || ''
     } : initialValues)
+  }
+
+  const submitMed = async (values: any) => {
+    setSubmittingAddMed(true)
+    await post(CREATE_MEDICINE, values)
+    setSubmittingAddMed(false)
+    await getMedList()
+    setOpenAddMed(false)
+  }
+
+  const submitSupplier = async (values: any) => {
+    setSubmittingAddSupplier(true)
+    await post(CREATE_SUPPLIER, values)
+    setSubmittingAddSupplier(false)
+    await getSuplierList()
+    setOpenAddSupplier(false)
+  }
+
+  const submitRack = async (values: any) => {
+    setSubmittingAddRack(true)
+    await post(CREATE_LOCATION_RACK, values)
+    setSubmittingAddRack(false)
+    await getLocationRack()
+    setOpenAddRack(false)
   }
 
   useEffect(() => {
@@ -111,11 +220,38 @@ const Purchase = () => {
             : "Edit purchase"
         }
         open={open}
-        fields={fields(getMedList, getSuplierList, getLocationRack)}
+        fields={fields(meds, suppliers, locationRacks, setOpenAddMed, setOpenAddSupplier, setOpenAddRack)}
         loading={loadingSubmit}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}
         onSubmit={(values) => onSubmit(values, initialValues?.id)}
+      />
+      <ModalAdd
+          width={500}
+          loading={submittingAddMed}
+          title={"Create Medicine"}
+          open={openAddMed}
+          fields={fieldsMed(categories || [], units || [])}
+          setOpen={(v) => setOpenAddMed(v)}
+          onSubmit={(values) => submitMed(values)}
+      />
+      <ModalAdd
+          width={500}
+          loading={submittingAddSupplier}
+          title={"Create Supplier"}
+          open={openAddSupplier}
+          fields={fieldsSuplier}
+          setOpen={(v) => setOpenAddSupplier(v)}
+          onSubmit={(values) => submitSupplier(values)}
+      />
+      <ModalAdd
+          width={500}
+          loading={submittingAddRack}
+          title={"Create Location Rack"}
+          open={openAddRack}
+          fields={fieldsLocationRack}
+          setOpen={(v) => setOpenAddRack(v)}
+          onSubmit={(values) => submitRack(values)}
       />
     </ContentWrapper>
   )

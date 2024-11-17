@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal} from 'antd';
+import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal, Tabs} from 'antd';
 import {
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
   DeleteOutlined,
   UserOutlined,
-   WarningTwoTone
+  WarningTwoTone, RedoOutlined
 } from '@ant-design/icons';
 import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
 import useApi from "@/hooks/useApi.tsx";
@@ -52,6 +52,7 @@ export default function PharmacyPOS() {
   // const [cart, setCart] = useState<CartItem[]>([]);
   const [cart, setCart] = useAtom(stateCart)
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeOrder, setTypeOrder] = useState('order');
   const [selectedCategory, _setSelectedCategory] = useState('all');
   const [filteredProducts, setFilteredProducts] = useState<InventoryMed[]>([]);
   const [loadingMed, setLoadingMed] = useState<boolean>(false);
@@ -180,7 +181,39 @@ export default function PharmacyPOS() {
     }, 1000)
   }
 
+  const handleRefund = async () => {
+    setLoading(true)
+    const orderRefund = (await post('/sales/refund', cart.map(c => ({
+      refundItemId: c.id,
+      refundItemQuantity: c.quantity,
+    }))))
+    if(orderRefund) {
+      setSearchTerm('')
+      // if (selectedCustomer) {
+      //   message.success(`Order placed successfully for ${selectedCustomer.label}!`);
+      // } else {
+      //   message.success('Order placed successfully!');
+      // }
+      Modal.success({
+        title: selectedCustomer ? `Order placed successfully for ${selectedCustomer?.label}!` : 'Order placed successfully!',
+        footer: (_, { OkBtn }) => (
+            <>
+              {/*<Button onClick={() => printOrder(order)}>Print bill</Button>*/}
+              <OkBtn />
+            </>
+        )
+
+      })
+      setCart([]);
+      setSelectedCustomer(null);
+    }
+    setLoading(false)
+  }
+
   const handleCheckout = async () => {
+    if(typeOrder == 'refund') {
+      return handleRefund()
+    }
     const dataBody = {
       customerId: selectedCustomer?.id,
       usePoint: false,
@@ -293,7 +326,7 @@ export default function PharmacyPOS() {
                     >
                       <p  className={'text-red-500'}>${product.medicine.price.toFixed(2)}</p>
                       <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>{product.quantity} in-stock</span>
+                        <span>{product.quantity} {product.medicine?.unit?.unit || 'pcs'}</span>
                         <span>exp: {product.expDate}</span>
                       </p>
                     </Card>
@@ -302,24 +335,45 @@ export default function PharmacyPOS() {
               />
             </Col>
             <Col span={8}>
-              <Card title={<Title level={4}>Cart <ShoppingCartOutlined/></Title>}>
-                { !selectedCustomer &&
-                  <AutoComplete
-                    style={{width: '100%', marginBottom: 16}}
-                    options={customerOptions}
-                    onSearch={handleCustomerSearch}
-                    onSelect={handleCustomerSelect}
-                    className={"autocomplete-customer"}
-                    placeholder="Search customer by phone or name"
-                  >
-                    <Input prefix={<UserOutlined/>}
-                           suffix={<Tooltip title='Create new customer'><PlusOutlined onClick={() => setIsModalVisible(true)}/></Tooltip>}/>
-                  </AutoComplete>
+              <Card title={
+                // <Title level={4}>Cart <ShoppingCartOutlined/></Title>
+                <Tabs
+                    defaultActiveKey={typeOrder}
+                    items={[
+                      {
+                        label: <Title level={4}>Cart <ShoppingCartOutlined/></Title>,
+                        key: 'order',
+
+                      },
+                      {
+                        label: <Title level={4}>Refund <RedoOutlined/></Title>,
+                        key: 'refund',
+                      },
+                    ]}
+                    onChange={setTypeOrder}
+                />
+              }>
+                {
+                  typeOrder == 'order' && <>
+                      { !selectedCustomer &&
+                          <AutoComplete
+                              style={{width: '100%', marginBottom: 16}}
+                              options={customerOptions}
+                              onSearch={handleCustomerSearch}
+                              onSelect={handleCustomerSelect}
+                              className={"autocomplete-customer"}
+                              placeholder="Search customer by phone or name"
+                          >
+                            <Input prefix={<UserOutlined/>}
+                                   suffix={<Tooltip title='Create new customer'><PlusOutlined onClick={() => setIsModalVisible(true)}/></Tooltip>}/>
+                          </AutoComplete>
+                      }
+                      {!!selectedCustomer && <div className='customer-info'>
+                        <div><UserOutlined/> {selectedCustomer?.label}</div>
+                        <div><Tooltip title="unuse customer"><DeleteOutlined onClick={() => setSelectedCustomer(null)} /></Tooltip></div>
+                      </div>}
+                    </>
                 }
-                {!!selectedCustomer && <div className='customer-info'>
-                  <div><UserOutlined/> {selectedCustomer?.label}</div>
-                    <div><Tooltip title="unuse customer"><DeleteOutlined onClick={() => setSelectedCustomer(null)} /></Tooltip></div>
-                </div>}
                 <List
                   dataSource={cart}
                   renderItem={(item) => (
@@ -389,7 +443,7 @@ export default function PharmacyPOS() {
                     disabled={cart.length === 0}
                     className={'w-full'}
                   >
-                    Checkout
+                    {typeOrder == 'refund' ? 'Refund' : 'Checkout'}
                   </Button>
                 </div>
               </Card>
@@ -399,7 +453,7 @@ export default function PharmacyPOS() {
       </div>
       <Modal
         title={'Create Customer'}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >

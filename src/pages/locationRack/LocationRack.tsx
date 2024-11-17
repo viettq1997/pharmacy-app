@@ -8,13 +8,13 @@ import ContentWrapper from "@/components/ContentWrapper"
 import DrawerForm from "@/components/DrawerForm"
 import Table from "@/components/Table"
 import useApi from "@/hooks/useApi"
-import { Field } from "@/types/FieldTypes"
 import { convertISODate } from "@/utils/function"
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { App, Button, Popconfirm, Space, TableProps } from "antd"
 import { memo, useEffect, useState } from "react"
 import { TGetData, TInfo } from "./LocationRack.type"
+import {fields} from "@/pages/locationRack/LocationRack.data.tsx";
 
 const defaultInitialValues: any = {
   id: null,
@@ -168,16 +168,6 @@ const LocationRack = () => {
       ),
     },
   ] satisfies TableProps["columns"]
-
-  const fields: Field[] = [
-    {
-      label: "Position",
-      name: "position",
-      type: "text",
-      placeholder: "Position",
-      rules: [{ required: true, message: "Position is required" }],
-    },
-  ]
 
   let total = 0
   let dataSource: TInfo[] = []

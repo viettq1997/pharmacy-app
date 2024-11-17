@@ -8,12 +8,12 @@ import ContentWrapper from "@/components/ContentWrapper"
 import DrawerForm from "@/components/DrawerForm"
 import Table from "@/components/Table"
 import useApi from "@/hooks/useApi"
-import { Field } from "@/types/FieldTypes"
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { App, Button, Popconfirm, Space, TableProps } from "antd"
 import { memo, useEffect, useState } from "react"
 import { TGetData, TInfo } from "./Supplier.type"
+import {fields} from "@/pages/supplier/Supplier.data.tsx";
 
 const defaultInitialValues: any = {
   id: null,
@@ -179,37 +179,6 @@ const Supplier = () => {
       ),
     },
   ] satisfies TableProps["columns"]
-
-  const fields: Field[] = [
-    {
-      label: "Name",
-      name: "name",
-      type: "text",
-      placeholder: "Name",
-      rules: [{ required: true, message: "Name is required" }],
-    },
-    {
-      label: "Address",
-      name: "address",
-      type: "text",
-      placeholder: "Address",
-      rules: [{ required: true, message: "Address is required" }],
-    },
-    {
-      label: "Phone Number",
-      name: "phoneNo",
-      type: "text",
-      placeholder: "Phone Number",
-      rules: [{ required: true, message: "Phone number is required" }],
-    },
-    {
-      label: "Email",
-      name: "mail",
-      type: "email",
-      placeholder: "Email",
-      rules: [{ type: "email", message: "Invalid email" }],
-    },
-  ]
 
   let total = 0
   let dataSource: TInfo[] = []

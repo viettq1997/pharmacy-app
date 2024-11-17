@@ -58,7 +58,7 @@ export const fields: () => Field[] = () => [
     {
         name: 'birthDate', label: 'Birth Date', type: 'date', rules: [
             {required: true},
-            maxDateByValue('mfgDate', 'EXP date', new Date(), 'Birth date must be less than today!')
+            maxDateByValue('birthDate', 'Birth date', new Date(), 'Birth date must be less than today!')
         ]
     },
     {
