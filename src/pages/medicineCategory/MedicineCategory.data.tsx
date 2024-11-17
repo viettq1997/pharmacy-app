@@ -56,16 +56,16 @@ export const columns = (
               onClick={() => onEdit(record)}
             />
           </Ability>
-          <Popconfirm
-            title="Confirm delete"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => onDelete(record.id)}
-          >
-            <Ability action="delete" subject="medicineCategory">
+          <Ability action="delete" subject="medicineCategory">
+            <Popconfirm
+              title="Confirm delete"
+              okText="Yes"
+              cancelText="No"
+              onConfirm={() => onDelete(record.id)}
+            >
               <Button danger type="primary" icon={<DeleteOutlined />} />
-            </Ability>
-          </Popconfirm>
+            </Popconfirm>
+          </Ability>
         </Space>
       ),
     },
