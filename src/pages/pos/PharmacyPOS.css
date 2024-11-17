@@ -21,3 +21,7 @@
 .ant-tabs-tab-active h4{
     color: var(--primary-color)!important;
 }
+.check-box-points {
+    display: flex;
+    justify-content: end;
+}

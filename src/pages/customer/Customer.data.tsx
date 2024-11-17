@@ -12,8 +12,10 @@ export const columns = (
     { title: "First Name", dataIndex: "firstName", key: "firstName" },
     { title: "Last Name", dataIndex: "lastName", key: "lastName" },
     { title: "Email", dataIndex: "mail", key: "mail" },
+    { title: "Phone", dataIndex: "phoneNo", key: "phoneNo" },
     { title: "Age", dataIndex: "age", key: "age" },
     { title: "Gender", dataIndex: "sex", key: "sex" },
+    { title: "Point", dataIndex: "points", key: "points" },
     {
       key: "action",
       align: "center",
