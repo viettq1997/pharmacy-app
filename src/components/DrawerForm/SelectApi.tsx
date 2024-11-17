@@ -17,10 +17,10 @@ export interface SearchApiProps<ValueType = any>
 }
 
 export function SearchApi<
-  ValueType extends { key?: string; label: React.ReactNode; value: string | number } = any,
+  ValueType extends { key?: string; label: React.ReactNode; value: string | number, selectorState?: string } = any,
 >({ fetchOptions, debounceTimeout = 800, onAdd, showButtonAdd, ...props }: SearchApiProps<ValueType>) {
   const [fetching, setFetching] = useState(false);
-  const selectorState = useAtomValue(atomSelector)
+  const atomSelectorState = useAtomValue(atomSelector)
   const [options, setOptions] = useState<ValueType[]>(props.options || []);
   const fetchRef = useRef(0);
 
@@ -32,7 +32,7 @@ export function SearchApi<
       setFetching(true);
 
       if(!fetchOptions) {
-        setOptions(props?.selectorState ? selectorState[props.selectorState] || [] : props.options || []);
+        setOptions(props?.selectorState ? atomSelectorState[props.selectorState] || [] : props.options || []);
         setFetching(false);
         return
       }
@@ -56,12 +56,12 @@ export function SearchApi<
   }, []);
   useEffect(() => {
     if(props?.selectorState) {
-      setOptions(selectorState[props.selectorState] || []);
-      if(props.onChange && selectorState[props.selectorState]?.length) {
-        props.onChange(selectorState[props.selectorState][0] as any, selectorState[props.selectorState]);
+      setOptions(atomSelectorState[props.selectorState] || []);
+      if(props.onChange && atomSelectorState[props.selectorState]?.length) {
+        props.onChange(atomSelectorState[props.selectorState][0] as any, atomSelectorState[props.selectorState]);
       }
     }
-  }, props?.selectorState ? [selectorState[props.selectorState]] : []);
+  }, props?.selectorState ? [atomSelectorState[props.selectorState]] : []);
 
   return (
       <Space.Compact style={{ width: '100%' }}>

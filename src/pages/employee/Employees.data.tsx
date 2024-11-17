@@ -28,16 +28,16 @@ export const columns = (
                                 onClick={() => _onEdit(record)}
                         />
                     </Ability>
+                    <Ability action="delete" subject="employee">
                     <Popconfirm
                         title="Confirm delete"
                         okText="Yes"
                         cancelText="No"
                         onConfirm={() => _onDelete(record.id as string)}
                     >
-                        <Ability action="delete" subject="employee">
-                            <Button hidden danger type="primary" icon={<DeleteOutlined/>}/>
-                        </Ability>
+                        <Button hidden danger type="primary" icon={<DeleteOutlined/>}/>
                     </Popconfirm>
+                    </Ability>
                 </Space>
             ),
         },
@@ -50,7 +50,7 @@ export const fields: () => Field[] = () => [
         label: 'Role',
         type: 'select',
         rules: [{required: true}],
-        options: [{label: 'User', value: 'USER'}, {label: 'Admin', value: 'admin'}]
+        options: [{label: 'User', value: 'USER'}, {label: 'Admin', value: 'ADMIN'}]
     },
     {name: 'password', label: 'Password', type: 'password', rules: [{required: true, min: 8}]},
     {name: 'firstName', label: 'First Name', type: 'text', rules: [{required: true}]},

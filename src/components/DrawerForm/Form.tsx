@@ -53,6 +53,7 @@ const CustomForm: FC<TCustomFormProps> = ({
                        }}
                        showSearch={true}
                        value={form.getFieldValue(field.name)}
+                       selectorState={field.selectorState}
                        fetchOptions={field.fetchOptions}/>
         )
       case "date":

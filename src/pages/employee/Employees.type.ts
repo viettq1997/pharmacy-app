@@ -1,4 +1,5 @@
 import {InfoBaseContextInterface, ResponseListBaseInterface} from "@/types/CommonTypes.ts";
+import {a} from "vite/dist/node/types.d-aGj9QkWt";
 
 export interface EmployeeInterface {
     id?: string;
@@ -7,7 +8,7 @@ export interface EmployeeInterface {
     password: string;
     firstName: string;
     lastName: string;
-    birthDate: string;
+    birthDate: a;
     age: number;
     sex: string;
     type: string;
