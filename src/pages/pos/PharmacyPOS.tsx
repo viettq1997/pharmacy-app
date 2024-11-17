@@ -14,11 +14,11 @@ import {generateBill} from "@/utils/function.ts";
 import "./PharmacyPOS.css"
 import BaseForm from "@/components/BaseForm.tsx";
 import {fields as customerFields} from "@/pages/customer/Customer.data";
-import moment from "moment";
 import {CartItem, InventoryMed} from "@/types/CartTypes.ts";
 import {useAtom} from "jotai/index";
 import {stateCart} from "@/states/cart.ts";
 import {CustomerInterface} from '@/pages/customer/Customer.type.ts';
+import dayjs from 'dayjs';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -168,7 +168,7 @@ export default function PharmacyPOS() {
       listItems,
       orderCode: order?.code,
       amount: order.totalAmount,
-      orderPayTime: moment(new Date(order?.createdDate)).format('DD-MM-YYYY HH:mm'),
+      orderPayTime: dayjs(new Date(order?.createdDate)).format('DD-MM-YYYY HH:mm'),
       totalAmount: listItems.reduce((a, v) => v.amount + a, 0),
     })
     const windowPrint = window.open('');
