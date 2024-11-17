@@ -2,16 +2,14 @@ import { useKeycloak } from "@react-keycloak/web"
 import { App } from "antd"
 import axios, { AxiosRequestConfig, AxiosRequestHeaders } from "axios"
 import { useEffect, useState } from "react"
-import { useCookies } from "react-cookie"
 
 const useApi = () => {
   const { notification } = App.useApp()
-  const [{ token }, _, removeCookie] = useCookies(["token"])
-  const { keycloak } = useKeycloak()
+  const { keycloak, initialized } = useKeycloak()
   const [headers, setHeaders] = useState<
     Pick<AxiosRequestHeaders, "Authorization"> | undefined
   >({
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${keycloak.token}`,
   })
 
   const api = axios.create({
@@ -20,16 +18,27 @@ const useApi = () => {
   })
 
   useEffect(() => {
-    if (token)
+    if (keycloak.token)
       setHeaders({
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${keycloak.token}`,
       })
     else setHeaders(undefined)
-  }, [token])
+
+    if (initialized) {
+      keycloak.onAuthRefreshSuccess = () => {
+        setHeaders({
+          Authorization: `Bearer ${keycloak.token}`,
+        })
+      }
+    }
+
+    return () => {
+      keycloak.onAuthRefreshSuccess = () => {}
+    }
+  }, [keycloak, initialized])
 
   const throwUnauthenticated = (e: any) => {
     setHeaders(undefined)
-    removeCookie("token")
     keycloak.updateToken()
     throw e
   }
