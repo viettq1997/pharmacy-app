@@ -54,7 +54,7 @@ const AppSider = () => {
           Pharmacy
         </Typography.Title>
       </Flex>
-      <MacScrollbar>
+      <MacScrollbar skin="dark" className="h-[calc(100vh-114px)]">
         <Menu
           theme="dark"
           mode="inline"

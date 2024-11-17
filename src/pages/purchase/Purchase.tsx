@@ -35,7 +35,7 @@ const Purchase = () => {
 
   const [_selectorState, setSelectorState] = useAtom(atomSelector)
   const { data: dataCategory } = useQuery<TDataGetMedicineCategory[]>({
-        queryKey: ["getMedicineCategories"],
+        queryKey: ["getMedicineCategoriesForPurchase"],
         queryFn: () => {
           return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 }).then(
               resp => {

@@ -61,7 +61,7 @@ const MedicineProvider = () => {
   })
   const { data: dataCategory, isPending: isPendingCategory } =
     useQuery<TDataGetMedicineCategory>({
-      queryKey: ["getMedicineCategories"],
+      queryKey: ["getMedicineCategoriesForMedicine"],
       queryFn: () => {
         return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 })
       },
@@ -120,7 +120,11 @@ const MedicineProvider = () => {
   useEffect(() => {
     if (isPending || isPendingCategory || isPendingUnit)
       setInfo((prev) => ({ ...prev, loading: true }))
-    else if (data && dataCategory && dataUnit) {
+    else setInfo((prev) => ({ ...prev, loading: false }))
+  }, [isPending, isPendingCategory, isPendingUnit])
+
+  useEffect(() => {
+    if (data) {
       const newData = data.content.map((item) => {
         if (item.updatedDate)
           item.updatedDate = convertISODate(item.updatedDate)
@@ -133,31 +137,39 @@ const MedicineProvider = () => {
           createdDate: convertISODate(item.createdDate),
         }
       })
+      setInfo((prev) => ({
+        ...prev,
+        data: newData,
+        total: data.totalElement,
+      }))
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (dataCategory) {
       const newDataCategory = dataCategory.content.map((item) => ({
         label: item.name,
         value: item.id,
       }))
+      setInfo((prev) => ({
+        ...prev,
+        dataCategory: newDataCategory,
+      }))
+    }
+  }, [dataCategory])
+
+  useEffect(() => {
+    if (dataUnit) {
       const newDataUnit = dataUnit.map((item) => ({
         label: item.unit,
         value: item.id,
       }))
       setInfo((prev) => ({
         ...prev,
-        data: newData,
-        dataCategory: newDataCategory,
         dataUnit: newDataUnit,
-        total: data.totalElement,
-        loading: false,
       }))
     }
-  }, [
-    data,
-    dataCategory,
-    dataUnit,
-    isPending,
-    isPendingCategory,
-    isPendingUnit,
-  ])
+  }, [dataUnit])
 
   return (
     <MedicineContext.Provider

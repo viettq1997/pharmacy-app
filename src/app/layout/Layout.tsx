@@ -9,7 +9,7 @@ import AppSider from "./Sider"
 
 const AppLayout = () => {
   const { keycloak, initialized } = useKeycloak()
-  const [{ token }, setCookie, removeCookie] = useCookies(["token"])
+  const [_, setCookie] = useCookies(["token"])
 
   useEffect(() => {
     if (initialized) {
@@ -17,8 +17,9 @@ const AppLayout = () => {
         setCookie("token", keycloak.token)
       }
       keycloak.onAuthRefreshError = () => {
-        removeCookie("token")
-        keycloak.logout()
+        keycloak.logout({
+          redirectUri: window.location.origin,
+        })
       }
     }
     return () => {
@@ -28,8 +29,9 @@ const AppLayout = () => {
   }, [initialized])
 
   useEffect(() => {
-    if (keycloak.authenticated && !token) setCookie("token", keycloak.token)
-  }, [keycloak, token, initialized])
+    if (keycloak.authenticated && keycloak.token)
+      setCookie("token", keycloak.token)
+  }, [keycloak])
 
   return (
     <>
@@ -42,7 +44,8 @@ const AppLayout = () => {
             spinning
             size="large"
             className="fixed top-[calc(50%-16px)] left-[calc(50%-16px)] z-50"
-          />`
+          />
+          `
         </>
       )}
       <Layout className={cn("w-screen h-screen")}>
