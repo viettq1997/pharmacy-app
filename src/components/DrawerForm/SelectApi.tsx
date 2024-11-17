@@ -1,19 +1,27 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import { Select, Spin } from 'antd';
+import {Button, Select, Space, Spin} from 'antd';
 import type { SelectProps } from 'antd';
 import debounce from 'lodash/debounce';
+import {PlusOutlined} from "@ant-design/icons";
+import {atomSelector} from "@/states/selector.ts";
+import {useAtomValue} from "jotai/index";
 
 export interface SearchApiProps<ValueType = any>
   extends Omit<SelectProps<ValueType | ValueType[]>, 'options' | 'children'> {
   fetchOptions?: (search: string) => Promise<ValueType[]>;
   debounceTimeout?: number;
+  showButtonAdd?: boolean,
+  selectorState?: string,
+  options?: any[],
+  onAdd?: () => void,
 }
 
 export function SearchApi<
-  ValueType extends { key?: string; label: React.ReactNode; value: string | number } = any,
->({ fetchOptions, debounceTimeout = 800, ...props }: SearchApiProps<ValueType>) {
+  ValueType extends { key?: string; label: React.ReactNode; value: string | number, selectorState?: string } = any,
+>({ fetchOptions, debounceTimeout = 800, onAdd, showButtonAdd, ...props }: SearchApiProps<ValueType>) {
   const [fetching, setFetching] = useState(false);
-  const [options, setOptions] = useState<ValueType[]>([]);
+  const atomSelectorState = useAtomValue(atomSelector)
+  const [options, setOptions] = useState<ValueType[]>(props.options || []);
   const fetchRef = useRef(0);
 
   const debounceFetcher = useMemo(() => {
@@ -23,15 +31,19 @@ export function SearchApi<
       setOptions([]);
       setFetching(true);
 
-      if(!fetchOptions) return
+      if(!fetchOptions) {
+        setOptions(props?.selectorState ? atomSelectorState[props.selectorState] || [] : props.options || []);
+        setFetching(false);
+        return
+      }
       fetchOptions(value).then((newOptions) => {
+        setFetching(false);
         if (fetchId !== fetchRef.current) {
           // for fetch callback order
           return;
         }
 
         setOptions(newOptions);
-        setFetching(false);
       });
     };
 
@@ -42,51 +54,27 @@ export function SearchApi<
       debounceFetcher('')
     }
   }, []);
+  useEffect(() => {
+    if(props?.selectorState) {
+      setOptions(atomSelectorState[props.selectorState] || []);
+      if(props.onChange && atomSelectorState[props.selectorState]?.length) {
+        props.onChange(atomSelectorState[props.selectorState][0] as any, atomSelectorState[props.selectorState]);
+      }
+    }
+  }, props?.selectorState ? [atomSelectorState[props.selectorState]] : []);
 
   return (
-    <Select
-      labelInValue
-      filterOption={false}
-      onSearch={debounceFetcher}
-      placeholder={props.placeholder}
-      notFoundContent={fetching ? <Spin size="small" /> : null}
-      {...props}
-      options={options}
-    />
+      <Space.Compact style={{ width: '100%' }}>
+        <Select
+            labelInValue
+            filterOption={false}
+            onSearch={debounceFetcher}
+            placeholder={props.placeholder}
+            notFoundContent={fetching ? <Spin size="small" /> : null}
+            {...props}
+            options={options}
+        />
+        {showButtonAdd && <Button type="primary" onClick={onAdd}><PlusOutlined/></Button>}
+      </Space.Compact>
   );
 }
-
-
-// async function fetchUserList(username: string): Promise<UserValue[]> {
-//   console.log('fetching user', username);
-//
-//   return fetch('https://randomuser.me/api/?results=5')
-//     .then((response) => response.json())
-//     .then((body) =>
-//       body.results.map(
-//         (user: { name: { first: string; last: string }; login: { username: string } }) => ({
-//           label: `${user.name.first} ${user.name.last}`,
-//           value: user.login.username,
-//         }),
-//       ),
-//     );
-// }
-//
-// const App: React.FC = () => {
-//   const [value, setValue] = useState<UserValue[]>([]);
-//
-//   return (
-//     <SearchApi
-//       mode="multiple"
-//       value={value}
-//       placeholder="Select users"
-//       fetchOptions={fetchUserList}
-//       onChange={(newValue) => {
-//         setValue(newValue as UserValue[]);
-//       }}
-//       style={{ width: '100%' }}
-//     />
-//   );
-// };
-//
-// export default App;

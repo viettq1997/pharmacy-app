@@ -5,6 +5,7 @@ import { columns, fields } from "@/pages/employee/Employees.data.tsx"
 import { EmployeeInterface } from "@/pages/employee/Employees.type.ts"
 import { EmployeesContext } from "@/pages/employee/EmployeesContext.tsx"
 import { useContext, useEffect, useState } from "react"
+import dayjs from "dayjs";
 
 const Employee = () => {
   const {
@@ -30,7 +31,10 @@ const Employee = () => {
   ) => {
     setOpen(isOpen)
     setTypeForm(typeForm)
-    setInitialValues(initialValues)
+    setInitialValues(initialValues ? {
+      ...initialValues,
+      birthDate: dayjs(new Date(initialValues.birthDate))
+    } : initialValues)
   }
 
   useEffect(() => {

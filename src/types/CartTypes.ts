@@ -12,6 +12,7 @@ export interface InventoryMed {
     medicine: {
         "id": string,
         "name": string,
+        "unit": any,
         "price": number,
         "categoryId": string,
         "createdDate": string,

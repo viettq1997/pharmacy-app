@@ -7,8 +7,11 @@ export interface Field {
   type: 'text' | 'number' | 'email' | 'password' | 'textarea' | 'select' | 'select-api' | 'date';
   placeholder?: string;
   fetchOptions?: (search: string) => Promise<any[]>;
+  showButtonAdd?: boolean,
+  onAdd?: () => void,
   options?: { label: string; value: string }[];
   rules?: Rule[];
   prefix?: ReactNode
   suffix?: ReactNode
+  selectorState?: string;
 }

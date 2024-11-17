@@ -47,14 +47,14 @@ const CustomForm: FC<TCustomFormProps> = ({
         )
       case "select-api":
         return (
-          <SearchApi
-            placeholder={field.placeholder}
-            onChange={(newValue) => {
-              form.setFieldValue(field.name, newValue.value)
-            }}
-            value={form.getFieldValue(field.name)}
-            fetchOptions={field.fetchOptions}
-          />
+            <SearchApi {...field} placeholder={field.placeholder}
+                       onChange={(newValue) => {
+                           form.setFieldValue(field.name, newValue.value);
+                       }}
+                       showSearch={true}
+                       value={form.getFieldValue(field.name)}
+                       selectorState={field.selectorState}
+                       fetchOptions={field.fetchOptions}/>
         )
       case "date":
         return (

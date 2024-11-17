@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal} from 'antd';
+import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal, Tabs} from 'antd';
 import {
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
   DeleteOutlined,
   UserOutlined,
-   WarningTwoTone
+  WarningTwoTone, RedoOutlined
 } from '@ant-design/icons';
 import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
 import useApi from "@/hooks/useApi.tsx";
@@ -19,6 +19,7 @@ import {useAtom} from "jotai/index";
 import {stateCart} from "@/states/cart.ts";
 import {CustomerInterface} from '@/pages/customer/Customer.type.ts';
 import dayjs from 'dayjs';
+import {atomApp} from "@/states/app.ts";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -51,12 +52,13 @@ export default function PharmacyPOS() {
   const [loading, setLoading] = useState(false);
   // const [cart, setCart] = useState<CartItem[]>([]);
   const [cart, setCart] = useAtom(stateCart)
+  const [appState, setAppState] = useAtom(atomApp)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, _setSelectedCategory] = useState('all');
   const [filteredProducts, setFilteredProducts] = useState<InventoryMed[]>([]);
   const [loadingMed, setLoadingMed] = useState<boolean>(false);
   const [_categories, setCategories] = useState<Category[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  // const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customerOptions, setCustomerOptions] = useState<any[]>([]);
   const [searchCustomer, setSearchCustomer] = useState<string>('');
 
@@ -180,9 +182,48 @@ export default function PharmacyPOS() {
     }, 1000)
   }
 
+  const handleRefund = async () => {
+    setLoading(true)
+    const orderRefund = (await post('/sales/refund', cart.map(c => ({
+      refundItemId: c.id,
+      refundItemQuantity: c.quantity,
+    }))))
+    if(orderRefund) {
+      setSearchTerm('')
+      // if (selectedCustomer) {
+      //   message.success(`Order placed successfully for ${selectedCustomer.label}!`);
+      // } else {
+      //   message.success('Order placed successfully!');
+      // }
+      Modal.success({
+        title: 'Refund successfully !',
+        footer: (_, { OkBtn }) => (
+            <>
+              <OkBtn />
+            </>
+        )
+
+      })
+      setCart([]);
+      setSelectedCustomer(null);
+    }
+    setLoading(false)
+  }
+
+  const setTypeOrder = (t: string) => {
+    setAppState({...appState, typeOrder: t})
+  }
+
+  const setSelectedCustomer = (c: Customer | null) => {
+    setAppState({...appState, customerSelected: c})
+  }
+
   const handleCheckout = async () => {
+    if(appState.typeOrder == 'refund') {
+      return handleRefund()
+    }
     const dataBody = {
-      customerId: selectedCustomer?.id,
+      customerId: appState.customerSelected?.id,
       usePoint: false,
       saleItems: cart.map(c => ({
         inventoryId: c.id,
@@ -200,7 +241,7 @@ export default function PharmacyPOS() {
       //   message.success('Order placed successfully!');
       // }
       Modal.success({
-        title: selectedCategory ? `Order placed successfully for ${selectedCustomer?.label}!` : 'Order placed successfully!',
+        title: appState.customerSelected ? `Order placed successfully for ${appState.customerSelected?.label}!` : 'Order placed successfully!',
         footer: (_, { OkBtn }) => (
             <>
               <Button onClick={() => printOrder(order)}>Print bill</Button>
@@ -291,9 +332,9 @@ export default function PharmacyPOS() {
                         </Button>
                       ]}
                     >
-                      <p  className={'text-red-500'}>${product.medicine.price.toFixed(2)}</p>
+                      <p  className={'text-red-500'}>${product.medicine.price.toLocaleString(undefined, {maximumFractionDigits:2})}</p>
                       <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>{product.quantity} in-stock</span>
+                        <span>{product.quantity} {product.medicine?.unit?.unit || 'pcs'}</span>
                         <span>exp: {product.expDate}</span>
                       </p>
                     </Card>
@@ -302,31 +343,52 @@ export default function PharmacyPOS() {
               />
             </Col>
             <Col span={8}>
-              <Card title={<Title level={4}>Cart <ShoppingCartOutlined/></Title>}>
-                { !selectedCustomer &&
-                  <AutoComplete
-                    style={{width: '100%', marginBottom: 16}}
-                    options={customerOptions}
-                    onSearch={handleCustomerSearch}
-                    onSelect={handleCustomerSelect}
-                    className={"autocomplete-customer"}
-                    placeholder="Search customer by phone or name"
-                  >
-                    <Input prefix={<UserOutlined/>}
-                           suffix={<Tooltip title='Create new customer'><PlusOutlined onClick={() => setIsModalVisible(true)}/></Tooltip>}/>
-                  </AutoComplete>
+              <Card title={
+                // <Title level={4}>Cart <ShoppingCartOutlined/></Title>
+                <Tabs
+                    defaultActiveKey={appState.typeOrder}
+                    items={[
+                      {
+                        label: <Title level={4}>Cart <ShoppingCartOutlined/></Title>,
+                        key: 'order',
+
+                      },
+                      {
+                        label: <Title level={4}>Refund <RedoOutlined/></Title>,
+                        key: 'refund',
+                      },
+                    ]}
+                    onChange={setTypeOrder}
+                />
+              }>
+                {
+                  appState.typeOrder == 'order' && <>
+                      { !appState.customerSelected &&
+                          <AutoComplete
+                              style={{width: '100%', marginBottom: 16}}
+                              options={customerOptions}
+                              onSearch={handleCustomerSearch}
+                              onSelect={handleCustomerSelect}
+                              className={"autocomplete-customer"}
+                              placeholder="Search customer by phone or name"
+                          >
+                            <Input prefix={<UserOutlined/>}
+                                   suffix={<Tooltip title='Create new customer'><PlusOutlined onClick={() => setIsModalVisible(true)}/></Tooltip>}/>
+                          </AutoComplete>
+                      }
+                      {!!appState.customerSelected && <div className='customer-info'>
+                        <div><UserOutlined/> {appState.customerSelected?.label}</div>
+                        <div><Tooltip title="unuse customer"><DeleteOutlined onClick={() => setSelectedCustomer(null)} /></Tooltip></div>
+                      </div>}
+                    </>
                 }
-                {!!selectedCustomer && <div className='customer-info'>
-                  <div><UserOutlined/> {selectedCustomer?.label}</div>
-                    <div><Tooltip title="unuse customer"><DeleteOutlined onClick={() => setSelectedCustomer(null)} /></Tooltip></div>
-                </div>}
                 <List
                   dataSource={cart}
                   renderItem={(item) => (
                     <List.Item>
                       <List.Item.Meta
                         title={item.medicine.name}
-                        description={`$${item.medicine.price.toFixed(2)}`}
+                        description={`$${item.medicine.price.toLocaleString(undefined, {maximumFractionDigits:2})}`}
                       />
                       <div className="flex items-center">
                         <Button
@@ -379,9 +441,14 @@ export default function PharmacyPOS() {
                   <Title level={4}>
                     <div className="flex justify-between">
                       <div>Total:</div>
-                      <div className={'text-red-500'}>${getTotalPrice().toFixed(2)}</div>
+                      <div className={'text-red-500'}>${getTotalPrice().toLocaleString(undefined, {maximumFractionDigits:2})}</div>
                     </div>
                   </Title>
+                  {appState.typeOrder == 'refund' &&
+                      <Input.TextArea placeholder="Note" value={appState.noteRefund} autoSize onChange={(e) => {
+                        setAppState({...appState, noteRefund: e.target.value})
+                      }} style={{ marginBottom: '0.5rem' }} />
+                  }
                   <Button
                     type="primary"
                     size="middle"
@@ -389,7 +456,7 @@ export default function PharmacyPOS() {
                     disabled={cart.length === 0}
                     className={'w-full'}
                   >
-                    Checkout
+                    {appState.typeOrder == 'refund' ? 'Refund' : 'Checkout'}
                   </Button>
                 </div>
               </Card>
@@ -399,7 +466,7 @@ export default function PharmacyPOS() {
       </div>
       <Modal
         title={'Create Customer'}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
