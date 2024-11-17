@@ -2,20 +2,15 @@ import { cn } from "@/utils/function"
 import { useKeycloak } from "@react-keycloak/web"
 import { Layout, Spin } from "antd"
 import { useEffect } from "react"
-import { useCookies } from "react-cookie"
 import AppContent from "./Content"
 import AppHeader from "./Header"
 import AppSider from "./Sider"
 
 const AppLayout = () => {
   const { keycloak, initialized } = useKeycloak()
-  const [_, setCookie] = useCookies(["token"])
 
   useEffect(() => {
     if (initialized) {
-      keycloak.onAuthRefreshSuccess = () => {
-        setCookie("token", keycloak.token)
-      }
       keycloak.onAuthRefreshError = () => {
         keycloak.logout({
           redirectUri: window.location.origin,
@@ -23,15 +18,9 @@ const AppLayout = () => {
       }
     }
     return () => {
-      keycloak.onAuthRefreshSuccess = () => {}
       keycloak.onAuthRefreshError = () => {}
     }
   }, [initialized])
-
-  useEffect(() => {
-    if (keycloak.authenticated && keycloak.token)
-      setCookie("token", keycloak.token)
-  }, [keycloak])
 
   return (
     <>

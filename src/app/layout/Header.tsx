@@ -5,12 +5,10 @@ import { useKeycloak } from "@react-keycloak/web"
 import { Dropdown, Flex, Layout, Typography } from "antd"
 import { useAtomValue } from "jotai"
 import { useState } from "react"
-import { useCookies } from "react-cookie"
 
 const AppHeader = () => {
   const appState = useAtomValue(atomApp)
   const { keycloak } = useKeycloak()
-  const [_cookies, _setCookie] = useCookies(["token"])
 
   const [openChangePassword, setOpenChangePassword] = useState(false)
 
