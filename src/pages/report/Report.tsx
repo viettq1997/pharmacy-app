@@ -151,6 +151,7 @@ const Report = () => {
   return (
     <ContentWrapper
       hideCreate
+      hideSearch
       subjectCreate="report"
       filterElement={
         <DatePicker.RangePicker

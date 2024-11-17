@@ -35,7 +35,7 @@ const PurchaseProvider = () => {
 
   const { get, post, put, del } = useApi()
   const { data, isPending, refetch } = useQuery<ResponseListPurchaseInterface>({
-    queryKey: ["getMedicineCategories", page, filter],
+    queryKey: ["getPurchase", page, filter],
     queryFn: () => {
       const params: any = {
         page: page - 1,

@@ -10,13 +10,14 @@ import { useCookies } from "react-cookie"
 const AppHeader = () => {
   const appState = useAtomValue(atomApp)
   const { keycloak } = useKeycloak()
-  const [_cookies, _setCookie, removeCookie] = useCookies(["token"])
+  const [_cookies, _setCookie] = useCookies(["token"])
 
   const [openChangePassword, setOpenChangePassword] = useState(false)
 
   const handleLogout = () => {
-    removeCookie("token")
-    keycloak.logout()
+    keycloak.logout({
+      redirectUri: window.location.origin,
+    })
   }
 
   return (
@@ -30,7 +31,9 @@ const AppHeader = () => {
             items: [
               {
                 key: "email",
-                label: keycloak.tokenParsed?.name,
+                label:
+                  keycloak.tokenParsed?.name ||
+                  keycloak.tokenParsed?.preferred_username,
                 className: "pointer-events-none",
               },
               {
