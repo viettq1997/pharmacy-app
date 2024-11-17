@@ -1,6 +1,6 @@
 import useApi from "@/hooks/useApi"
 import { useMutation } from "@tanstack/react-query"
-import { Form, Input, Modal } from "antd"
+import { App, Form, Input, Modal } from "antd"
 import { FC, memo, useEffect } from "react"
 
 type TChangePasswordProps = {
@@ -9,6 +9,7 @@ type TChangePasswordProps = {
 }
 
 const ChangePassword: FC<TChangePasswordProps> = ({ open, onClose }) => {
+  const { notification } = App.useApp()
   const [form] = Form.useForm()
   const { post } = useApi()
   const { data, mutate, isPending } = useMutation({
@@ -21,7 +22,10 @@ const ChangePassword: FC<TChangePasswordProps> = ({ open, onClose }) => {
   }
 
   useEffect(() => {
-    if (data) handleClose()
+    if (data) {
+      notification.success({ message: "Password is changed successful!" })
+      handleClose()
+    }
   }, [data])
 
   return (

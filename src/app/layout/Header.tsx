@@ -29,9 +29,7 @@ const AppHeader = () => {
             items: [
               {
                 key: "email",
-                label:
-                  keycloak.tokenParsed?.name ||
-                  keycloak.tokenParsed?.preferred_username,
+                label: keycloak.tokenParsed?.preferred_username || "Anonymous",
                 className: "pointer-events-none",
               },
               {
