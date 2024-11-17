@@ -24,23 +24,27 @@ body,
   color: var(--primary-color);
 }
 
-.ant-table-body {
+.ant-table-body,
+.ant-drawer-body {
   scrollbar-width: auto;
   scrollbar-color: auto;
 }
 
-.ant-table-body::-webkit-scrollbar {
+.ant-table-body::-webkit-scrollbar,
+.ant-drawer-body::-webkit-scrollbar {
   width: 8px;
 }
 
-.ant-table-body::-webkit-scrollbar-track {
+.ant-table-body::-webkit-scrollbar-track,
+.ant-drawer-body::-webkit-scrollbar-track {
   background-color: #ffffff00;
 }
 
-.ant-table-body::-webkit-scrollbar-thumb {
+.ant-table-body::-webkit-scrollbar-thumb,
+.ant-drawer-body::-webkit-scrollbar-thumb {
   border-radius: 6px;
-  background-color: #ebebeb;
+  background-color: #e8e8e8;
 }
 .bg-none {
-    background: none !important;
+  background: none !important;
 }

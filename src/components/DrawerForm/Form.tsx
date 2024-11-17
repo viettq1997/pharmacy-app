@@ -1,7 +1,14 @@
+import { SearchApi } from "@/components/DrawerForm/SelectApi.tsx"
 import { Field } from "@/types/FieldTypes"
-import { Form, FormInstance, Input, InputNumber, Select } from "antd"
+import {
+  DatePicker,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Select,
+} from "antd"
 import { FC, memo } from "react"
-import {SearchApi} from "@/components/DrawerForm/SelectApi.tsx";
 
 export type TCustomFormProps = {
   form: FormInstance
@@ -40,12 +47,22 @@ const CustomForm: FC<TCustomFormProps> = ({
         )
       case "select-api":
         return (
-          <SearchApi placeholder={field.placeholder}
-                      onChange={(newValue) => {
-                        form.setFieldValue(field.name, newValue.value);
-                      }}
-                     value={form.getFieldValue(field.name)}
-                     fetchOptions={field.fetchOptions}/>
+          <SearchApi
+            placeholder={field.placeholder}
+            onChange={(newValue) => {
+              form.setFieldValue(field.name, newValue.value)
+            }}
+            value={form.getFieldValue(field.name)}
+            fetchOptions={field.fetchOptions}
+          />
+        )
+      case "date":
+        return (
+          <DatePicker
+            needConfirm
+            placeholder={field.placeholder}
+            className="w-full"
+          />
         )
       default:
         return (
