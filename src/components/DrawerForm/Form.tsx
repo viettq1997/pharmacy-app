@@ -38,18 +38,20 @@ const CustomForm: FC<TCustomFormProps> = ({
             suffix={field.suffix}
             placeholder={field.placeholder}
             className="w-full"
+            disabled={field.disable}
           />
         )
       case "textarea":
         return (
           <Input.TextArea
+              disabled={field.disable}
             placeholder={field.placeholder}
             autoSize={{ minRows: 3 }}
           />
         )
       case "select":
         return (
-          <Select placeholder={field.placeholder} options={field.options} />
+          <Select placeholder={field.placeholder} options={field.options} disabled={field.disable} />
         )
       case "select-api":
         return (
@@ -57,7 +59,7 @@ const CustomForm: FC<TCustomFormProps> = ({
                        onChange={(newValue) => {
                            form.setFieldValue(field.name, newValue);
                        }}
-                       showSearch={true}
+                       showSearch={true} disabled={field.disable}
                        value={form.getFieldValue(field.name)}
                        selectorState={field.selectorState}
                        fetchOptions={field.fetchOptions}/>
@@ -66,7 +68,7 @@ const CustomForm: FC<TCustomFormProps> = ({
         return (
           <DatePicker
             needConfirm
-            placeholder={field.placeholder}
+            placeholder={field.placeholder} disabled={field.disable}
             className="w-full"
           />
         )
@@ -74,7 +76,7 @@ const CustomForm: FC<TCustomFormProps> = ({
         return (
           <Input
             prefix={field.prefix}
-            suffix={field.suffix}
+            suffix={field.suffix} disabled={field.disable}
             placeholder={field.placeholder}
             type={field.type}
           />
@@ -89,7 +91,7 @@ const CustomForm: FC<TCustomFormProps> = ({
       initialValues={initialValues}
       onFinish={onSubmit}
     >
-      {fields.map((field) => (
+      {fields.filter(field => !field.hide).map((field) => (
         <Form.Item
           key={field.name}
           label={field.label}

@@ -61,7 +61,7 @@ const Employee = () => {
       <DrawerForm
         title={typeForm === "add" ? "Create Employee" : "Edit Employee"}
         open={open}
-        fields={typeForm === "add" ? fields() : fields().filter(f => !['username', 'role', 'password'].includes(f.name))}
+        fields={fields(typeForm)}
         loading={loadingSubmit}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}
