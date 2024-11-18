@@ -84,5 +84,6 @@ export const fields: () => Field[] = () => [
     name: "description",
     type: "textarea",
     placeholder: "Medicine Category Description",
+    rules: [{ required: true, message: "Description is required" }],
   },
 ]

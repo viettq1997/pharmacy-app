@@ -32,6 +32,7 @@ const defaultInfo: TInfoContext = {
   onDelete: () => {},
   onSubmit: () => {},
   onSearch: () => {},
+  refetchCategory: () => {}
 }
 
 export const MedicineContext = createContext<TInfoContext>(defaultInfo)
@@ -45,7 +46,6 @@ const MedicineProvider = () => {
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState<TFilter>({})
   const [info, setInfo] = useState<TInfoContext>({ ...defaultInfo, setPage })
-
   const { get, post, put, del } = useApi()
   const { data, isPending, refetch } = useQuery<TDataGetMedicine>({
     queryKey: ["getMedicines", page, filter],
@@ -59,7 +59,7 @@ const MedicineProvider = () => {
       return get(GET_MEDICINES_PAGINATION, params)
     },
   })
-  const { data: dataCategory, isPending: isPendingCategory } =
+  const { data: dataCategory, isPending: isPendingCategory, refetch: refetchCategory } =
     useQuery<TDataGetMedicineCategory>({
       queryKey: ["getMedicineCategoriesForMedicine"],
       queryFn: () => {
@@ -173,7 +173,7 @@ const MedicineProvider = () => {
 
   return (
     <MedicineContext.Provider
-      value={{ ...info, page, setPage, onDelete, onSubmit, onSearch }}
+      value={{ ...info, page, setPage, onDelete, onSubmit, onSearch, refetchCategory }}
     >
       <Medicine />
     </MedicineContext.Provider>

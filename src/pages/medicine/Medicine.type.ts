@@ -25,6 +25,7 @@ export type TInfoContext = {
   onDelete: (id: string) => void
   onSubmit: (values: any, id?: string) => void
   onSearch: (key: string, value: any) => void
+  refetchCategory: () => void
 }
 
 export type TDataGetMedicine = {
