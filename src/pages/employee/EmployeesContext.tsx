@@ -50,6 +50,7 @@ const EmployeesProvider = () => {
             if (values.id) return put('/employees', values.id, values)
             if (typeof values === "string")
                 return del('/employees', values)
+            console.log(values)
             return post('/employees', values)
         },
     })
