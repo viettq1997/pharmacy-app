@@ -34,7 +34,7 @@ const EmployeesProvider = () => {
 
     const { get, post, put, del } = useApi()
     const { data, isPending, refetch } = useQuery<ResponseListEmployeeInterface>({
-        queryKey: ["getMedicineCategoriesForEmployee", page, filter],
+        queryKey: ["getEmployees", page, filter],
         queryFn: () => {
             const params: any = {
                 page: page - 1,

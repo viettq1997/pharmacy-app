@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react';
-import {Input, List, Card, Button, message, Typography, Row, Col, AutoComplete, Spin, Tooltip, Modal, Tabs} from 'antd';
+import {useState, useEffect, useMemo, useRef} from 'react';
+import {
+  Input,
+  List,
+  Card,
+  Button,
+  message,
+  Typography,
+  Row,
+  Col,
+  AutoComplete,
+  Spin,
+  Tooltip,
+  Modal,
+  Tabs,
+  Checkbox
+} from 'antd';
 import {
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
   DeleteOutlined,
   UserOutlined,
-  WarningTwoTone, RedoOutlined
+  WarningTwoTone, RedoOutlined, EnvironmentOutlined, InboxOutlined, ClockCircleOutlined
 } from '@ant-design/icons';
 import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
 import useApi from "@/hooks/useApi.tsx";
@@ -20,6 +35,7 @@ import {stateCart} from "@/states/cart.ts";
 import {CustomerInterface} from '@/pages/customer/Customer.type.ts';
 import dayjs from 'dayjs';
 import {atomApp} from "@/states/app.ts";
+import debounce from "lodash/debounce";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -81,7 +97,6 @@ export default function PharmacyPOS() {
       const customer = (await post('/customers', {
         ...values,
       }));
-      console.log(customer)
       setSelectedCustomer({
         ...customer,
         value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
@@ -96,30 +111,37 @@ export default function PharmacyPOS() {
     setLoading(false)
   };
 
-  const getMeds = async () => {
-    // const filtered = products.filter(product =>
-    //   (selectedCategory === 'All' || product.category === selectedCategory) &&
-    //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    // );
-    // setFilteredProducts(filtered);
-    setLoadingMed(true)
-    const params: any = {
-      page: currentPage - 1,
-      size: pageSize,
-      name: searchTerm || undefined,
-      categoryId: selectedCategory === 'all' ? undefined : selectedCategory
-    }
-    const { content, totalElement } =  await get('reports/inventory', params)
-    setFilteredProducts(content);
-    setTotal(totalElement)
-    setLoadingMed(false)
-  }
+  const fetchRef = useRef(0);
+  const getMeds = useMemo(() => {
+    const loadMeds = (v: string) => {
+      fetchRef.current += 1;
+      const fetchId = fetchRef.current;
+      setLoadingMed(true)
+      const params: any = {
+        page: currentPage - 1,
+        size: pageSize,
+        medicineName: v || undefined,
+        categoryId: selectedCategory === 'all' ? undefined : selectedCategory
+      }
+      get('reports/inventory', params).then(({ content, totalElement }) => {
+        if (fetchId !== fetchRef.current) {
+          // for fetch callback order
+          return;
+        }
+        setFilteredProducts(content);
+        setTotal(totalElement)
+        setLoadingMed(false)
+      })
+    };
+
+    return debounce(loadMeds, 300);
+  }, []);
 
   useEffect(() => {
     getCategories()
   }, [])
   useEffect(() => {
-    getMeds()
+    getMeds(searchTerm)
   }, [searchTerm, selectedCategory, currentPage]);
 
   const addToCart = (product: InventoryMed) => {
@@ -155,7 +177,11 @@ export default function PharmacyPOS() {
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.medicine.price * item.quantity, 0);
+    const total = cart.reduce((total, item) => total + item.medicine.price * item.quantity, 0)
+    if(appState.usePoint) {
+      return total - appState.customerSelected?.points || 0
+    }
+    return total
   };
 
   const printOrder = (order: any) => {
@@ -206,8 +232,13 @@ export default function PharmacyPOS() {
       })
       setCart([]);
       setSelectedCustomer(null);
+      setUsePoint(false)
     }
     setLoading(false)
+  }
+
+  const setUsePoint = (t: boolean) => {
+    setAppState({...appState, usePoint: t})
   }
 
   const setTypeOrder = (t: string) => {
@@ -215,6 +246,7 @@ export default function PharmacyPOS() {
   }
 
   const setSelectedCustomer = (c: Customer | null) => {
+    setUsePoint(c ? appState.usePoint : false)
     setAppState({...appState, customerSelected: c})
   }
 
@@ -321,26 +353,34 @@ export default function PharmacyPOS() {
                 renderItem={(product) => (
                   <List.Item className="pos-list-med">
                     <Card
-                      hoverable={true}  className={product.isGettingExpire ? 'border-warning' : ''}
-                      title={product.medicine.name}
-                      extra={product.isGettingExpire ? <Tooltip title='Warning: Medication is about to expire'>
-                        <WarningTwoTone style={{fontSize: '1.5rem'}} twoToneColor="#EB772FFF"/>
-                      </Tooltip> : <></>}
-                      actions={[
-                        <Button color="primary"   variant="text" className="add-to-cart" onClick={() => addToCart(product)}>
-                          <strong>Add to Cart</strong>
-                        </Button>
-                      ]}
+                        hoverable={true} className={product.isGettingExpire ? 'border-warning' : ''}
+                        title={product.medicine.name}
+                        extra={product.isGettingExpire ? <Tooltip title='Warning: Medication is about to expire'>
+                          <WarningTwoTone style={{fontSize: '1.5rem'}} twoToneColor="#EB772FFF"/>
+                        </Tooltip> : <></>}
+                        actions={[
+                          <Button color="primary" variant="text" className="add-to-cart"
+                                  onClick={() => addToCart(product)}>
+                            <strong>Add to Cart</strong>
+                          </Button>
+                        ]}
                     >
-                      <p  className={'text-red-500'}>${product.medicine.price.toLocaleString(undefined, {maximumFractionDigits:2})}</p>
+                      <p className={'text-red-500'}>$ {product.medicine.price.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
                       <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>{product.quantity} {product.medicine?.unit?.unit || 'pcs'}</span>
-                        <span>exp: {product.expDate}</span>
+                        <Tooltip
+                            title={'Location: ' + (product?.locationRack?.position || '-')}><span><EnvironmentOutlined/> {product?.locationRack?.position || '-'}</span></Tooltip>
+                        <Tooltip
+                            title={'In-stock: ' + (product.medicine?.unit?.unit || 'pcs')}><span><InboxOutlined/> {product.quantity} {product.medicine?.unit?.unit || 'pcs'}</span></Tooltip>
+
+                      </p>
+                      <p style={{color: '#a5a5a5', display: 'flex', justifyContent: 'space-between'}}>
+                        <Tooltip
+                            title={'Expired date: ' + (product.expDate)}><span><ClockCircleOutlined/> {product.expDate}</span></Tooltip>
                       </p>
                     </Card>
                   </List.Item>
-                )}
-              />
+                  )}
+                />
             </Col>
             <Col span={8}>
               <Card title={
@@ -388,7 +428,7 @@ export default function PharmacyPOS() {
                     <List.Item>
                       <List.Item.Meta
                         title={item.medicine.name}
-                        description={`$${item.medicine.price.toLocaleString(undefined, {maximumFractionDigits:2})}`}
+                        description={`$ ${item.medicine.price.toLocaleString(undefined, {maximumFractionDigits:2})}`}
                       />
                       <div className="flex items-center">
                         <Button
@@ -438,10 +478,16 @@ export default function PharmacyPOS() {
                   )}
                 />
                 <div className="mt-4">
+                  {(appState.typeOrder == 'order' && !!appState.customerSelected?.points) &&
+                      <Checkbox onChange={(v) => setUsePoint(v.target.checked)}
+                                className={'check-box-points'} checked={appState.usePoint}>
+                        Use {appState.customerSelected?.points?.toLocaleString(undefined, {maximumFractionDigits:2})} points
+                      </Checkbox>
+                  }
                   <Title level={4}>
                     <div className="flex justify-between">
                       <div>Total:</div>
-                      <div className={'text-red-500'}>${getTotalPrice().toLocaleString(undefined, {maximumFractionDigits:2})}</div>
+                      <div className={'text-red-500'}>$ {getTotalPrice().toLocaleString(undefined, {maximumFractionDigits:2})}</div>
                     </div>
                   </Title>
                   {appState.typeOrder == 'refund' &&

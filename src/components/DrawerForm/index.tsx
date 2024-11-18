@@ -1,5 +1,5 @@
 import { SaveOutlined } from "@ant-design/icons"
-import { Button, Drawer, Form } from "antd"
+import {Button, Drawer, Form, FormInstance} from 'antd';
 import { FC, memo, useEffect } from "react"
 import CustomForm, { TCustomFormProps } from "./Form"
 
@@ -9,6 +9,7 @@ type TDrawerFormProps = {
   width?: number
   loading?: boolean
   setOpen: () => void
+  updateForm?: (form: FormInstance) => void
 } & Omit<TCustomFormProps, "form">
 
 const DrawerForm: FC<TDrawerFormProps> = ({
@@ -17,6 +18,7 @@ const DrawerForm: FC<TDrawerFormProps> = ({
   loading,
   width = 600,
   setOpen,
+  updateForm,
   ...props
 }) => {
   const [form] = Form.useForm()

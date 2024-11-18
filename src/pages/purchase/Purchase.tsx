@@ -73,6 +73,7 @@ const Purchase = () => {
   const [open, setOpen] = useState(false)
   const [typeForm, setTypeForm] = useState<"add" | "edit">("add")
   const [initialValues, setInitialValues] = useState<PurchaseInterface>()
+  const [updateValues, setUpdateValues] = useState<Partial<PurchaseInterface>>()
   const {get, post} = useApi()
 
   async function getMedList(keyword: string = '') {
@@ -170,26 +171,38 @@ const Purchase = () => {
 
   const submitMed = async (values: any) => {
     setSubmittingAddMed(true)
-    await post(CREATE_MEDICINE, values)
+    const med = await post(CREATE_MEDICINE, values)
     setSubmittingAddMed(false)
     await getMedList()
     setOpenAddMed(false)
+    setUpdateValues({
+      ...(updateValues || {}),
+      medicineId: med?.id || ''
+    })
   }
 
   const submitSupplier = async (values: any) => {
     setSubmittingAddSupplier(true)
-    await post(CREATE_SUPPLIER, values)
+    const s = await post(CREATE_SUPPLIER, values)
     setSubmittingAddSupplier(false)
     await getSuplierList()
     setOpenAddSupplier(false)
+    setUpdateValues({
+      ...(updateValues || {}),
+      supplierId: s?.id || ''
+    })
   }
 
   const submitRack = async (values: any) => {
     setSubmittingAddRack(true)
-    await post(CREATE_LOCATION_RACK, values)
+    const r = await post(CREATE_LOCATION_RACK, values)
     setSubmittingAddRack(false)
     await getLocationRack()
     setOpenAddRack(false)
+    setUpdateValues({
+      ...(updateValues || {}),
+      locationRackId: r?.id || ''
+    })
   }
 
   useEffect(() => {
@@ -222,6 +235,7 @@ const Purchase = () => {
         open={open}
         fields={fields(meds, suppliers, locationRacks, setOpenAddMed, setOpenAddSupplier, setOpenAddRack)}
         loading={loadingSubmit}
+        patchValue={updateValues}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}
         onSubmit={(values) => onSubmit(values, initialValues?.id)}
