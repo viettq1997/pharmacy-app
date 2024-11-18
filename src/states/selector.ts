@@ -4,5 +4,5 @@ export const atomSelector = atom<any>({
   categories: [],
   meds: [],
   suppliers: [],
-  locationRacks: []
+  locationRacks: [],
 })

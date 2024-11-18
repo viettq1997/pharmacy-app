@@ -9,13 +9,14 @@ import useApi from "@/hooks/useApi.tsx";
 import {CREATE_MEDICINE, GET_MEDICINE_UNITS, GET_MEDICINES_PAGINATION} from "@/api/medicine.api.ts";
 import {CREATE_SUPPLIER, GET_SUPPLIER} from "@/api/supplier.api.ts";
 import {CREATE_LOCATION_RACK, GET_LOCATION_RACK} from "@/api/locationRack.api.ts";
+import { fields as fieldsCate } from "../medicineCategory/MedicineCategory.data"
 import { fields as fieldsMed } from "../medicine/Medicine.data"
 import { fields as fieldsSuplier } from "../supplier/Supplier.data.tsx"
 import { fields as fieldsLocationRack } from "../locationRack/LocationRack.data.tsx"
 import ModalAdd from "@/components/ModalAdd";
 import {useQuery} from "@tanstack/react-query";
 import {TDataGetMedicineCategory} from "@/pages/medicineCategory/MedicineCategory.type.ts";
-import {GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
+import {CREATE_MEDICINE_CATEGORY, GET_MEDICINE_CATEGORIES_PAGINATION} from "@/api/medicineCategory.api.ts";
 import {TDataGetMedicineUnit} from "@/pages/medicine/Medicine.type.ts";
 import {useAtom} from "jotai/index";
 import {atomSelector} from "@/states/selector.ts";
@@ -34,7 +35,7 @@ const Purchase = () => {
   } = useContext(PurchaseContext)
 
   const [_selectorState, setSelectorState] = useAtom(atomSelector)
-  const { data: dataCategory } = useQuery<TDataGetMedicineCategory[]>({
+  const { data: dataCategory, refetch: refetchCategory } = useQuery<TDataGetMedicineCategory[]>({
         queryKey: ["getMedicineCategoriesForPurchase"],
         queryFn: () => {
           return get(GET_MEDICINE_CATEGORIES_PAGINATION, { page: 0, size: 1000 }).then(
@@ -61,9 +62,14 @@ const Purchase = () => {
 
   const [units, setUnits] = useState<any>([])
   const [categories, setCategories] = useState<any>([])
+  const [openAddCategory, setOpenAddCategory] = useState(false)
+  const [submittingAddCategory, setSubmittingAddCategory] = useState(false)
+
   const [meds, setMeds] = useState<any>([])
   const [openAddMed, setOpenAddMed] = useState(false)
   const [submittingAddMed, setSubmittingAddMed] = useState(false)
+
+
   const [suppliers, setSuppliers] = useState<any>([])
   const [openAddSupplier, setOpenAddSupplier] = useState(false)
   const [submittingAddSupplier, setSubmittingAddSupplier] = useState(false)
@@ -74,6 +80,7 @@ const Purchase = () => {
   const [typeForm, setTypeForm] = useState<"add" | "edit">("add")
   const [initialValues, setInitialValues] = useState<PurchaseInterface>()
   const [updateValues, setUpdateValues] = useState<Partial<PurchaseInterface>>()
+  const [updateFormMed, setUpdateFormMed] = useState<any>()
   const {get, post} = useApi()
 
   async function getMedList(keyword: string = '') {
@@ -140,6 +147,12 @@ const Purchase = () => {
   useEffect(() => {
     if (dataCategory) {
       setCategories(dataCategory)
+      setSelectorState((prev: any) => {
+        return {
+          ...prev,
+          categories: dataCategory,
+        }
+      })
     }
   }, [dataCategory])
   useEffect(() => {
@@ -167,6 +180,18 @@ const Purchase = () => {
       supplierId: initialValues?.supplier?.id || '',
       locationRack: initialValues?.locationRack?.id || ''
     } : initialValues)
+  }
+
+  const submitCategory = async (values: any) => {
+    setSubmittingAddCategory(true)
+    const cate = await post(CREATE_MEDICINE_CATEGORY, values)
+    setSubmittingAddCategory(false)
+    await refetchCategory()
+    setOpenAddCategory(false)
+    setUpdateFormMed({
+      ...(updateFormMed || {}),
+      categoryId: cate?.id || ''
+    })
   }
 
   const submitMed = async (values: any) => {
@@ -242,10 +267,20 @@ const Purchase = () => {
       />
       <ModalAdd
           width={500}
+          loading={submittingAddCategory}
+          title={"Create Category"}
+          open={openAddCategory}
+          fields={fieldsCate()}
+          setOpen={(v) => setOpenAddCategory(v)}
+          onSubmit={(values) => submitCategory(values)}
+      />
+      <ModalAdd
+          width={500}
           loading={submittingAddMed}
           title={"Create Medicine"}
           open={openAddMed}
-          fields={fieldsMed(categories || [], units || [])}
+          patchValue={updateFormMed}
+          fields={fieldsMed(categories || [], units || [], setOpenAddCategory)}
           setOpen={(v) => setOpenAddMed(v)}
           onSubmit={(values) => submitMed(values)}
       />
