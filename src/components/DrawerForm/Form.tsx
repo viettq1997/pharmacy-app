@@ -55,7 +55,7 @@ const CustomForm: FC<TCustomFormProps> = ({
         return (
             <SearchApi {...field} placeholder={field.placeholder}
                        onChange={(newValue) => {
-                           form.setFieldValue(field.name, newValue.value);
+                           form.setFieldValue(field.name, newValue);
                        }}
                        showSearch={true}
                        value={form.getFieldValue(field.name)}
