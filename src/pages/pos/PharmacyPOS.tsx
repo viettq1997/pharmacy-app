@@ -97,7 +97,6 @@ export default function PharmacyPOS() {
       const customer = (await post('/customers', {
         ...values,
       }));
-      console.log(customer)
       setSelectedCustomer({
         ...customer,
         value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,

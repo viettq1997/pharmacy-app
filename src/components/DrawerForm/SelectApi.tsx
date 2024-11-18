@@ -18,7 +18,7 @@ export interface SearchApiProps<ValueType = any>
 
 export function SearchApi<
   ValueType extends { key?: string; label: React.ReactNode; value: string | number, selectorState?: string } = any,
->({ fetchOptions, debounceTimeout = 800, onAdd, showButtonAdd, ...props }: SearchApiProps<ValueType>) {
+>({ fetchOptions, debounceTimeout = 800, onAdd, showButtonAdd, selectorState, ...props }: SearchApiProps<ValueType>) {
   const [fetching, setFetching] = useState(false);
   const atomSelectorState = useAtomValue(atomSelector)
   const [options, setOptions] = useState<ValueType[]>(props.options || []);
@@ -32,7 +32,7 @@ export function SearchApi<
       setFetching(true);
 
       if(!fetchOptions) {
-        setOptions(props?.selectorState ? atomSelectorState[props.selectorState] || [] : props.options || []);
+        setOptions(selectorState ? atomSelectorState[selectorState] || [] : props.options || []);
         setFetching(false);
         return
       }
@@ -42,7 +42,6 @@ export function SearchApi<
           // for fetch callback order
           return;
         }
-
         setOptions(newOptions);
       });
     };
@@ -55,18 +54,17 @@ export function SearchApi<
     }
   }, []);
   useEffect(() => {
-    if(props?.selectorState) {
-      setOptions(atomSelectorState[props.selectorState] || []);
-      if(props.onChange && atomSelectorState[props.selectorState]?.length) {
-        props.onChange(atomSelectorState[props.selectorState][0] as any, atomSelectorState[props.selectorState]);
-      }
+    if(selectorState) {
+      setOptions(atomSelectorState[selectorState] || []);
+      // if(props.onChange && atomSelectorState[props.selectorState]?.length) {
+      //   props.onChange(atomSelectorState[props.selectorState][0] as any, atomSelectorState[props.selectorState]);
+      // }
     }
-  }, props?.selectorState ? [atomSelectorState[props.selectorState]] : []);
+  }, selectorState ? [atomSelectorState[selectorState]] : []);
 
   return (
       <Space.Compact style={{ width: '100%' }}>
         <Select
-            labelInValue
             filterOption={false}
             onSearch={debounceFetcher}
             placeholder={props.placeholder}

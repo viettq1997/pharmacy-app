@@ -8,12 +8,13 @@ import {
   InputNumber,
   Select,
 } from "antd"
-import { FC, memo } from "react"
+import {FC, memo, useEffect} from 'react';
 
 export type TCustomFormProps = {
   form: FormInstance
   fields: Field[]
   initialValues?: any
+  patchValue?: any
   onSubmit: (values: any) => void
 }
 
@@ -21,8 +22,13 @@ const CustomForm: FC<TCustomFormProps> = ({
   form,
   fields,
   initialValues,
-  onSubmit,
+  onSubmit, patchValue
 }) => {
+  useEffect(() => {
+    if(patchValue) {
+      form.setFieldsValue(patchValue)
+    }
+  }, [patchValue])
   const renderField = (field: Field) => {
     switch (field.type) {
       case "number":

@@ -8,6 +8,7 @@ type TModalAddProps = {
     title: string
     width?: number
     loading?: boolean
+    updateValues?: any
     setOpen: (v: boolean) => void
 } & Omit<TCustomFormProps, "form">
 
