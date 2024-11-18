@@ -56,7 +56,7 @@ export const fields: () => Field[] = () => [
     name: "firstName",
     label: "First Name",
     type: "text",
-    rules: [{ required: false }],
+    rules: [{ required: true }],
   },
   {
     name: "lastName",

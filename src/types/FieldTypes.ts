@@ -8,6 +8,8 @@ export interface Field {
   placeholder?: string;
   fetchOptions?: (search: string) => Promise<any[]>;
   showButtonAdd?: boolean,
+  disable?: boolean,
+  hide?: boolean,
   onAdd?: () => void,
   options?: { label: string; value: string }[];
   rules?: Rule[];

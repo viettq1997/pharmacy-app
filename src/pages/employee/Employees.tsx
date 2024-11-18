@@ -61,7 +61,7 @@ const Employee = () => {
       <DrawerForm
         title={typeForm === "add" ? "Create Employee" : "Edit Employee"}
         open={open}
-        fields={fields()}
+        fields={fields(typeForm)}
         loading={loadingSubmit}
         initialValues={initialValues}
         setOpen={() => handleOpen(false, "add")}
