@@ -99,8 +99,8 @@ export default function PharmacyPOS() {
       }));
       setSelectedCustomer({
         ...customer,
-        value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
-        label: `${customer.phoneNo} (${customer.firstName} ${customer.lastName})`,
+        value: `${customer.phoneNo} (${customer.firstName} ${customer.lastName || ''})`,
+        label: `${customer.phoneNo} (${customer.firstName} ${customer.lastName || ''})`,
       })
       message.success('Customer created successfully');
       setIsModalVisible(false);
