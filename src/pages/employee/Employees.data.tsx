@@ -44,7 +44,7 @@ export const columns = (
     ] satisfies TableProps["columns"]
 
 export const fields: (typeForm: string) => Field[] = (typeForm = 'add') => [
-    {name: 'username', label: 'Username', type: 'text', rules: [{required: true, min: 6}], disable: typeForm === 'edit'},
+    {name: 'username', label: 'Username', type: 'text', rules: typeForm === 'edit' ? [] : [{required: true, min: 6}], disable: typeForm === 'edit'},
     {
         name: 'role',
         label: 'Role',
