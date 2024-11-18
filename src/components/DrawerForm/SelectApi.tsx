@@ -54,6 +54,9 @@ export function SearchApi<
     }
   }, []);
   useEffect(() => {
+    setOptions(props.options || [])
+  }, [props.options]);
+  useEffect(() => {
     if(selectorState) {
       setOptions(atomSelectorState[selectorState] || []);
       // if(props.onChange && atomSelectorState[props.selectorState]?.length) {

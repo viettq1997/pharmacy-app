@@ -84,9 +84,10 @@ export const columns = (
     },
   ] satisfies TableProps["columns"]
 
-export const fields: (optionCategory: any[], optionUnit: any[]) => Field[] = (
+export const fields: (optionCategory: any[], optionUnit: any[], onAddCategory: any) => Field[] = (
   optionCategory,
-  optionUnit
+  optionUnit,
+  onAddCategory
 ) => [
   {
     label: "Name",
@@ -114,9 +115,11 @@ export const fields: (optionCategory: any[], optionUnit: any[]) => Field[] = (
   {
     label: "Category",
     name: "categoryId",
-    type: "select",
+    type: "select-api",
     placeholder: "Medicine Category",
     rules: [{ required: true, message: "Category is required" }],
     options: optionCategory,
+    showButtonAdd: true,
+    onAdd: onAddCategory
   },
 ]
