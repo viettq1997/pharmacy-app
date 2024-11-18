@@ -54,7 +54,7 @@ export const fields: (typeForm: string) => Field[] = (typeForm = 'add') => [
         disable: typeForm === 'edit',
         hide: typeForm === 'edit',
     },
-    {name: 'password', label: 'Password', type: 'password', rules: [{required: true, min: 8}],
+    {name: 'password', label: 'Password', type: 'password', rules: [{required: true}],
         disable: typeForm === 'edit',
         hide: typeForm === 'edit',},
     {name: 'firstName', label: 'First Name', type: 'text', rules: [{required: true}]},
