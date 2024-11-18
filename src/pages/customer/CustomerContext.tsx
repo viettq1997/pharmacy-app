@@ -34,7 +34,7 @@ const CustomerProvider = () => {
 
     const { get, post, put, del } = useApi()
     const { data, isPending, refetch } = useQuery<ResponseListCustomerInterface>({
-        queryKey: ["getMedicineCategories", page, filter],
+        queryKey: ["getMedicineCategoriesForCustomer", page, filter],
         queryFn: () => {
             const params: any = {
                 page: page - 1,

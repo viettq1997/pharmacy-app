@@ -1,7 +1,6 @@
 import useAbility from "@/hooks/useAbility"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { App, ConfigProvider, Spin } from "antd"
-import { CookiesProvider } from "react-cookie"
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { RouterData } from "./App.data"
 import AppLayout from "./layout/Layout"
@@ -45,24 +44,22 @@ const AppProvider = () => {
   ])
 
   return (
-    <CookiesProvider>
-      <ConfigProvider>
-        <App
-          notification={{
-            duration: 3,
-            maxCount: 3,
-            pauseOnHover: true,
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider
-              router={router}
-              fallbackElement={<Spin fullscreen size="large" />}
-            />
-          </QueryClientProvider>
-        </App>
-      </ConfigProvider>
-    </CookiesProvider>
+    <ConfigProvider>
+      <App
+        notification={{
+          duration: 3,
+          maxCount: 3,
+          pauseOnHover: true,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider
+            router={router}
+            fallbackElement={<Spin fullscreen size="large" />}
+          />
+        </QueryClientProvider>
+      </App>
+    </ConfigProvider>
   )
 }
 

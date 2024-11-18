@@ -5,18 +5,17 @@ import { useKeycloak } from "@react-keycloak/web"
 import { Dropdown, Flex, Layout, Typography } from "antd"
 import { useAtomValue } from "jotai"
 import { useState } from "react"
-import { useCookies } from "react-cookie"
 
 const AppHeader = () => {
   const appState = useAtomValue(atomApp)
   const { keycloak } = useKeycloak()
-  const [_cookies, _setCookie, removeCookie] = useCookies(["token"])
 
   const [openChangePassword, setOpenChangePassword] = useState(false)
 
   const handleLogout = () => {
-    removeCookie("token")
-    keycloak.logout()
+    keycloak.logout({
+      redirectUri: window.location.origin,
+    })
   }
 
   return (
@@ -30,7 +29,7 @@ const AppHeader = () => {
             items: [
               {
                 key: "email",
-                label: keycloak.tokenParsed?.name,
+                label: keycloak.tokenParsed?.preferred_username || "Anonymous",
                 className: "pointer-events-none",
               },
               {
