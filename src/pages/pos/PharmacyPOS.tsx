@@ -260,7 +260,7 @@ export default function PharmacyPOS() {
       saleItems: cart.map(c => ({
         inventoryId: c.id,
         quantity: c.quantity,
-        price: c.quantity * c.medicine.price
+        price: c.medicine.price
       }))
     }
     setLoading(true)
