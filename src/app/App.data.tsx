@@ -11,21 +11,19 @@ import {
   UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons"
-import { lazy, ReactElement } from "react"
+import { ReactElement } from "react"
 
-const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"))
-const Supplier = lazy(() => import("@/pages/supplier/Supplier"))
-const Medicine = lazy(() => import("@/pages/medicine/MedicineContext"))
-const MedicineCategory = lazy(
-  () => import("@/pages/medicineCategory/MedicineCategoryContext")
-)
-const Employees = lazy(() => import("@/pages/employee/EmployeesContext"))
-const LocationRack = lazy(() => import("@/pages/locationRack/LocationRack"))
-const PharmacyPOS = lazy(() => import("@/pages/pos/PharmacyPOS"))
-const Customer = lazy(() => import("@/pages/customer/CustomerContext"))
-const Setting = lazy(() => import("@/pages/setting/Setting"))
-const Purchase = lazy(() => import("@/pages/purchase/PurchaseContext"))
-const Report = lazy(() => import("@/pages/report/Report"))
+import Dashboard from "@/pages/dashboard/Dashboard"
+import Supplier from "@/pages/supplier/Supplier"
+import Medicine from "@/pages/medicine/MedicineContext"
+import MedicineCategory from "@/pages/medicineCategory/MedicineCategoryContext"
+import Employees from "@/pages/employee/EmployeesContext"
+import LocationRack from "@/pages/locationRack/LocationRack"
+import PharmacyPOS from "@/pages/pos/PharmacyPOS"
+import Customer from "@/pages/customer/CustomerContext"
+import Setting from "@/pages/setting/Setting"
+import Purchase from "@/pages/purchase/PurchaseContext"
+import Report from "@/pages/report/Report"
 
 type TRouteData = {
   key: string
