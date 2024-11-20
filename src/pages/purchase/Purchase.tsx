@@ -167,11 +167,13 @@ const Purchase = () => {
     typeForm: "add" | "edit",
     initialValues?: PurchaseInterface
   ) => {
-    await Promise.all([
-      getMedList(),
-      getSuplierList(),
-      getLocationRack(),
-    ])
+    if (isOpen) {
+      await Promise.all([
+        getMedList(),
+        getSuplierList(),
+        getLocationRack(),
+      ])
+    }
     setOpen(isOpen)
     setTypeForm(typeForm)
     setInitialValues(initialValues ? {
@@ -238,7 +240,7 @@ const Purchase = () => {
     <ContentWrapper
       subjectCreate="stockPurchase"
       onAdd={() => handleOpen(true, "add")}
-      onSearch={(keyword) => onSearch("name", keyword)}
+      onSearch={(keyword) => onSearch("medicineName", keyword)}
     >
       <Table
         page={page}
